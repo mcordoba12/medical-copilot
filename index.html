@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copiloto Médico - Transcripción</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f3f4f6;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: auto 1fr;
+            gap: 16px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 12px 16px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 14px;
+        }
+
+        .section-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .file-input-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            display: none;
+        }
+
+        .btn-file {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-file:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-small {
+            background: transparent;
+            color: #667eea;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn-small:hover:not(:disabled) {
+            background: #f3f4f6;
+            border-color: #667eea;
+        }
+
+        .btn-small:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-small.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .filename-display {
+            padding: 8px;
+            background: #dbeafe;
+            border: 1px solid #3b82f6;
+            border-radius: 6px;
+            color: #1e40af;
+            font-size: 12px;
+            margin-bottom: 8px;
+            display: none;
+        }
+
+        .filename-display.show {
+            display: block;
+        }
+
+        .audio-player {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .audio-player.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-bottom: 8px;
+        }
+
+        .empty-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #9ca3af;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 4px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.agent {
+            justify-content: flex-start;
+        }
+
+        .message.patient {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 12px;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .message.agent .message-bubble {
+            background: #2563eb;
+            color: white;
+            border-bottom-left-radius: 2px;
+        }
+
+        .message.patient .message-bubble {
+            background: #16a34a;
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+
+        .message.interim .message-bubble {
+            background: #d1d5db;
+            color: #374151;
+            font-style: italic;
+            opacity: 0.8;
+        }
+
+        .message.interim.agent .message-bubble {
+            background: #93c5fd;
+            color: #1e3a8a;
+            border-bottom-left-radius: 2px;
+        }
+
+        .message.interim.patient .message-bubble {
+            background: #86efac;
+            color: #166534;
+            border-bottom-right-radius: 2px;
+        }
+
+        .banner {
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            display: none;
+            border-left: 3px solid;
+            font-size: 12px;
+        }
+
+        .banner.show {
+            display: block;
+        }
+
+        .banner.error {
+            background: #fee2e2;
+            border-left-color: #ef4444;
+            color: #991b1b;
+        }
+
+        .banner.info {
+            background: #dbeafe;
+            border-left-color: #3b82f6;
+            color: #1e40af;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>🏥 Copiloto Médico v6.2</h1>
+        <p>Transcripción con AssemblyAI + Diarización + Subtítulos Sincronizados</p>
+    </div>
+
+    <!-- Banners -->
+    <div class="banner error" id="errorBanner"></div>
+    <div class="banner info" id="infoBanner"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Sección de carga y reproducción -->
+        <div class="section">
+            <div class="section-header">📤 Audio</div>
+            <div class="section-body" style="gap: 8px;">
+                <div class="file-input-group">
+                    <div class="file-input-wrapper">
+                        <button class="btn-file">📁 Seleccionar</button>
+                        <input type="file" id="audioFile" accept=".mp3,.wav,.m4a,.ogg,.webm,.flac">
+                    </div>
+                </div>
+
+                <div class="filename-display" id="filenameDisplay"></div>
+
+                <audio id="audioElement" class="audio-player" controls></audio>
+                <div style="font-size: 12px; color: #3b82f6; text-align: center; margin-top: 8px; display: none;" id="audioStatusMsg">
+                    ⏳ Transcribiendo...
+                </div>
+
+                <div style="font-size: 12px; color: #6b7280; text-align: center;">
+                    Carga un archivo y presiona Play
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de transcripción -->
+        <div class="section">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>💬 Transcripción con Diarización</span>
+                <button class="btn-small" id="swapBtn" disabled title="Intercambiar Agente/Paciente">🔄</button>
+            </div>
+            <div class="section-body">
+                <div class="empty-state" id="emptyState">
+                    Carga un archivo y presiona Play para transcribir
+                </div>
+                <div class="chat-container" id="chatContainer" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let ws = null;
+        let sessionId = null;
+        let isStreaming = false;
+        let swapSpeakers = false;
+
+        // AudioContext para capturar audio
+        let audioCtx = null;
+        let processor = null;
+        let source = null;
+
+
+        // Elementos del DOM
+        const audioFile = document.getElementById('audioFile');
+        const audioElement = document.getElementById('audioElement');
+        const filenameDisplay = document.getElementById('filenameDisplay');
+        const chatContainer = document.getElementById('chatContainer');
+        const emptyState = document.getElementById('emptyState');
+
+        // ========== CONECTAR WEBSOCKET ==========
+        window.addEventListener('load', () => {
+            connectWebSocket();
+        });
+
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const url = `${protocol}//${window.location.host}/ws/audio-stream`;
+
+            console.log('Conectando a:', url);
+
+            ws = new WebSocket(url);
+
+            ws.onopen = () => {
+                console.log('WebSocket de streaming abierto');
+                showInfo('Conectado. Carga un archivo y presiona Play.');
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('Mensaje WebSocket:', data.type);
+
+                    if (data.type === 'session_id') {
+                        sessionId = data.id;
+                        console.log('🔑 Session ID:', sessionId);
+
+                    } else if (data.type === 'transcription') {
+                        handleTranscription(data);
+
+                    } else if (data.type === 'status') {
+                        showInfo(data.message);
+                        console.log('📊 Status:', data.message);
+
+                    } else if (data.type === 'error') {
+                        showError(data.message);
+                    }
+                } catch (e) {
+                    console.error('Error parseando mensaje WebSocket:', e);
+                }
+            };
+
+            ws.onerror = (error) => {
+                console.error('Error WebSocket:', error);
+                showError('Error de conexión');
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket cerrado');
+                setTimeout(connectWebSocket, 3000);
+            };
+        }
+
+        // Nota: AssemblyAI batch processing
+        // 1. Enviar archivo completo
+        // 2. Esperar transcripción con timing
+        // 3. Reproducir con subtítulos sincronizados
+
+
+        // ========== SELECCIONAR ARCHIVO ==========
+        document.querySelector('.btn-file').addEventListener('click', (e) => {
+            e.preventDefault();
+            audioFile.click();
+        });
+
+        // Variables para AssemblyAI (batch processing)
+        let transcriptionQueue = []; // Cola de {text, speaker, start, end} - se muestran según currentTime
+        let lastDisplayedIndex = -1; // Índice del último utterance mostrado
+        let hasTranscription = false;
+        let isTranscribing = false;
+
+        audioFile.addEventListener('change', async (e) => {
+            selectedFile = e.target.files[0];
+            if (selectedFile) {
+                const fileUrl = URL.createObjectURL(selectedFile);
+                audioElement.src = fileUrl;
+
+                filenameDisplay.textContent = `✓ ${selectedFile.name} (${(selectedFile.size / 1024 / 1024).toFixed(2)} MB)`;
+                filenameDisplay.classList.add('show');
+
+                // Resetear para nuevo archivo
+                isStreaming = false;
+                transcriptionQueue = [];
+                lastDisplayedIndex = -1;
+                hasTranscription = false;
+                chatContainer.innerHTML = '';
+                emptyState.style.display = 'flex';
+                audioElement.classList.add('disabled'); // Deshabilitar Play hasta que lleguen datos
+
+                console.log('🎵 Archivo seleccionado:', selectedFile.name);
+                showInfo('⏳ Analizando audio con AssemblyAI...');
+
+                // ENVIAR A ASSEMBLYAI INMEDIATAMENTE (sin presionar Play)
+                await sendToAssemblyAI();
+            }
+        });
+
+        // ========== ENVIAR A ASSEMBLYAI ==========
+        async function sendToAssemblyAI() {
+            if (!selectedFile) {
+                showError('No hay archivo seleccionado');
+                return;
+            }
+
+            if (isTranscribing) {
+                console.log('⏳ Ya está transcribiendo...');
+                return;
+            }
+
+            isTranscribing = true;
+            console.log('📤 Enviando archivo a AssemblyAI...');
+
+            try {
+                // Leer archivo como bytes
+                const audioBuffer = await selectedFile.arrayBuffer();
+                const audioBytes = new Uint8Array(audioBuffer);
+
+                console.log(`📦 Enviando ${audioBytes.length} bytes`);
+
+                // Enviar archivo completo via WebSocket
+                if (!ws || ws.readyState !== WebSocket.OPEN) {
+                    throw new Error('WebSocket no conectado');
+                }
+
+                ws.send(audioBytes);
+                console.log('✅ Archivo enviado al backend');
+
+            } catch (error) {
+                console.error('❌ Error enviando archivo:', error);
+                showError('Error: ' + error.message);
+                isTranscribing = false;
+                audioElement.classList.add('disabled');
+            }
+        }
+
+        // ========== FLUJO DE REPRODUCCIÓN ==========
+        audioElement.addEventListener('play', async () => {
+            if (isStreaming) {
+                return; // Ya está reproduciendo
+            }
+
+            // Verificar que tenemos transcripción lista
+            if (!hasTranscription) {
+                console.warn('⚠️ Transcripción no lista aún');
+                audioElement.pause();
+                showError('Espera a que se complete el análisis');
+                return;
+            }
+
+            isStreaming = true;
+            console.log('▶️ Play detectado - reproduciendo con subtítulos sincronizados');
+            showInfo('🎤 Reproduciendo con subtítulos sincronizados...');
+            // El evento timeupdate se encargará de mostrar los subtítulos
+        });
+
+        audioElement.addEventListener('pause', () => {
+            if (isStreaming) {
+                console.log('⏸️ Audio pausado - los subtítulos dejarán de aparecer');
+                isStreaming = false;
+                // Los subtítulos automáticamente dejarán de aparecer porque
+                // updateTranscriptionDisplay() verifica que el audio no esté pausado
+            }
+        });
+
+        audioElement.addEventListener('ended', () => {
+            console.log('⏹️ Audio terminado');
+            isStreaming = false;
+            showInfo('✓ Reproducción finalizada');
+        });
+
+        // ========== SINCRONIZACIÓN DINÁMICA DE SUBTÍTULOS ==========
+        // Se dispara en cada timeupdate del audio
+        function updateTranscriptionDisplay() {
+            // Verificar precondiciones
+            if (transcriptionQueue.length === 0) {
+                return;
+            }
+
+            if (audioElement.paused) {
+                // No mostrar nada si el audio está pausado
+                return;
+            }
+
+            const currentTime = audioElement.currentTime;
+
+            // Mostrar todos los utterances que corresponden al tiempo actual
+            for (let i = lastDisplayedIndex + 1; i < transcriptionQueue.length; i++) {
+                const utterance = transcriptionQueue[i];
+
+                // Si aún no es tiempo de mostrar este utterance, detener
+                if (currentTime < utterance.start) {
+                    break;
+                }
+
+                // El tiempo llegó, mostrar este utterance
+                console.log(`📝 [@${currentTime.toFixed(2)}s] Mostrando: ${utterance.text}`);
+
+                // Crear mensaje en el chat
+                const messageDiv = document.createElement('div');
+
+                // Aplicar swap de speakers si está activado
+                let actualSpeaker = utterance.speaker || 0;
+                if (swapSpeakers) {
+                    actualSpeaker = actualSpeaker === 0 ? 1 : 0;
+                }
+
+                messageDiv.className = `message ${actualSpeaker === 0 ? 'patient' : 'agent'}`;
+
+                const bubble = document.createElement('div');
+                bubble.className = 'message-bubble';
+                bubble.textContent = utterance.text;
+
+                messageDiv.appendChild(bubble);
+                chatContainer.appendChild(messageDiv);
+
+                // Actualizar índice
+                lastDisplayedIndex = i;
+
+                // Auto-scroll
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        }
+
+        // Agregar evento timeupdate para sincronización
+        audioElement.addEventListener('timeupdate', updateTranscriptionDisplay);
+
+        // ========== INTERCAMBIAR SPEAKERS ==========
+        document.getElementById('swapBtn').addEventListener('click', () => {
+            swapSpeakers = !swapSpeakers;
+            const swapBtn = document.getElementById('swapBtn');
+
+            if (swapSpeakers) {
+                swapBtn.classList.add('active');
+                showInfo('Speakers intercambiados');
+            } else {
+                swapBtn.classList.remove('active');
+                showInfo('Speakers normales');
+            }
+
+            // Reinvertir todos los mensajes existentes
+            const messages = chatContainer.querySelectorAll('.message');
+            messages.forEach(msg => {
+                if (msg.classList.contains('agent')) {
+                    msg.classList.remove('agent');
+                    msg.classList.add('patient');
+                } else {
+                    msg.classList.remove('patient');
+                    msg.classList.add('agent');
+                }
+            });
+
+            console.log('Speakers intercambiados:', swapSpeakers);
+        });
+
+
+        // ========== MANEJAR TRANSCRIPCIONES ASSEMBLYAI ==========
+        function handleTranscription(data) {
+            const { text, speaker, start, end, is_final } = data;
+
+            if (!text || !text.trim()) {
+                return;
+            }
+
+            console.log(`🎤 Speaker ${speaker}: ${text} [${start.toFixed(2)}s - ${end.toFixed(2)}s] (final: ${is_final})`);
+
+            // Almacenar SOLO en la cola - NO mostrar todavía
+            transcriptionQueue.push({
+                text: text.trim(),
+                speaker: speaker || 0,
+                start: start || 0,
+                end: end || 0
+            });
+
+            // Si es final, marcar como listo y habilitar reproducción
+            if (is_final) {
+                console.log(`✅ Transcripción completada - ${transcriptionQueue.length} utterances en cola`);
+                hasTranscription = true;
+                isTranscribing = false;
+                lastDisplayedIndex = -1; // Resetear para que empiece desde el primero
+
+                // Habilitar el reproductor (ahora que los datos están listos)
+                audioElement.classList.remove('disabled');
+                audioElement.currentTime = 0;
+
+                // Mostrar chat (vacío por ahora)
+                if (emptyState.style.display !== 'none') {
+                    emptyState.style.display = 'none';
+                    chatContainer.style.display = 'flex';
+                    document.getElementById('swapBtn').disabled = false;
+                }
+
+                showInfo('✅ Análisis completado - presiona Play para reproducir con subtítulos');
+            }
+        }
+
+
+        // ========== NOTIFICACIONES ==========
+        function showError(message) {
+            const banner = document.getElementById('errorBanner');
+            banner.textContent = `❌ ${message}`;
+            banner.classList.add('show');
+            setTimeout(() => banner.classList.remove('show'), 5000);
+            console.error(message);
+        }
+
+        function showInfo(message) {
+            const banner = document.getElementById('infoBanner');
+            banner.textContent = `ℹ️ ${message}`;
+            banner.classList.add('show');
+            setTimeout(() => banner.classList.remove('show'), 5000);
+            console.log(message);
+        }
+    </script>
+</body>
+</html>
