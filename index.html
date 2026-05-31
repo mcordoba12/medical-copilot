@@ -13,39 +13,293 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f3f4f6;
-            padding: 20px;
+            background: #f9fbe7;
+            padding: 10px;
             height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a5c2a 0%, #2e7d32 100%);
             color: white;
-            padding: 16px 24px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 10px 16px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 8px rgba(26, 92, 42, 0.2);
+            flex-shrink: 0;
         }
 
         .header h1 {
-            font-size: 24px;
-            margin-bottom: 4px;
+            font-size: 18px;
+            margin-bottom: 2px;
         }
 
         .header p {
-            font-size: 13px;
+            font-size: 11px;
             opacity: 0.9;
+            margin: 0;
         }
 
         .main-content {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr 2fr;
             grid-template-rows: auto 1fr;
-            gap: 16px;
+            gap: 8px;
             flex: 1;
             min-height: 0;
+            overflow: hidden;
+        }
+
+        .main-content-left {
+            grid-column: 1;
+            grid-row: 1 / 3;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        #analysisPanel {
+            grid-column: 2;
+            grid-row: 1 / 3;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 6px;
+            scrollbar-width: thin;
+        }
+
+        /* Panel principal de preguntas sugeridas */
+        #suggestedQuestionsContainer {
+            background: linear-gradient(135deg, #2e7d32 0%, #1a5c2a 100%);
+            border-radius: 10px;
+            padding: 12px;
+            box-shadow: 0 6px 20px rgba(46, 125, 50, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 220px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex-shrink: 0;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.3) transparent;
+        }
+
+        #suggestedQuestionsContainer strong {
+            color: white;
+            font-size: 13px;
+            display: block;
+            margin-bottom: 2px;
+            position: sticky;
+            top: 0;
+            background: linear-gradient(135deg, #2e7d32 0%, #1a5c2a 100%);
+            padding: 0 0 2px 0;
+        }
+
+        .suggestion-item {
+            background: white;
+            padding: 10px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #374151;
+            font-size: 13px;
+            line-height: 1.4;
+            border-left: 3px solid #2e7d32;
+        }
+
+        .suggestion-item:hover {
+            transform: translateX(2px);
+            box-shadow: 0 2px 8px rgba(46, 125, 50, 0.15);
+            background: #f1f8f4;
+        }
+
+        .suggestion-item:active {
+            transform: translateX(2px);
+        }
+
+        /* Secciones secundarias */
+        .analysis-section {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 13px;
+            line-height: 1.6;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .analysis-section strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #1f2937;
+            font-size: 14px;
+        }
+
+        .patient-item {
+            padding: 6px 0;
+            color: #374151;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .patient-item:last-child {
+            border-bottom: none;
+        }
+
+        .alert-text {
+            color: #dc2626;
+            padding: 6px 0;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Triage visual system */
+        .triage-container {
+            display: flex;
+            gap: 8px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            justify-content: space-between;
+            align-items: stretch;
+        }
+
+        .triage-level {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: default;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            min-height: 60px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .triage-level.inactive {
+            background: #f3f4f6;
+            color: #d1d5db;
+        }
+
+        /* Nivel Negro - No hay riesgo (gris) */
+        .triage-level.negro.active {
+            background: #374151;
+            color: white;
+            border-color: #1f2937;
+            box-shadow: 0 0 12px rgba(55, 65, 81, 0.3);
+        }
+
+        /* Nivel Verde - Consulta general */
+        .triage-level.verde.active {
+            background: #dcfce7;
+            color: #15803d;
+            border-color: #16a34a;
+            box-shadow: 0 0 12px rgba(22, 163, 74, 0.3);
+        }
+
+        /* Nivel Amarillo - Urgencia */
+        .triage-level.amarillo.active {
+            background: #fef3c7;
+            color: #b45309;
+            border-color: #f59e0b;
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+        }
+
+        /* Nivel Rojo - Emergencia */
+        .triage-level.rojo.active {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #ef4444;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+            animation: pulse-rojo 1.5s infinite;
+        }
+
+        @keyframes pulse-rojo {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .triage-emoji {
+            font-size: 24px;
+            margin-bottom: 2px;
+        }
+
+        .triage-label {
+            font-size: 10px;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .placeholder-content {
+            color: #d1d5db;
+            text-align: center;
+            padding: 20px;
+            background: #f3f4f6;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.6;
+            transition: opacity 0.3s ease-out, background-color 0.3s ease-out;
+        }
+
+        .placeholder-content.fade-out {
+            opacity: 0;
+        }
+
+        #suggestedQuestionsContainer .placeholder-content {
+            background: rgba(255, 255, 255, 0.3);
+            color: #f3f4f6;
+            padding: 30px;
+        }
+
+        .analysis-section.empty {
+            background: #f3f4f6;
+        }
+
+        .analysis-section.empty strong {
+            color: #9ca3af;
+        }
+
+        .analysis-section.empty .empty-text {
+            color: #d1d5db;
+            text-align: center;
+            padding: 16px;
+            font-style: italic;
+        }
+
+        @media (max-width: 1440px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .main-content-left {
+                grid-column: 1;
+            }
+
+            #analysisPanel {
+                grid-column: 1;
+                grid-row: auto;
+            }
         }
 
         .section {
@@ -91,7 +345,7 @@
 
         .btn-file {
             width: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2e7d32 0%, #1a5c2a 100%);
             color: white;
             padding: 10px 16px;
             border-radius: 6px;
@@ -105,11 +359,11 @@
 
         .btn-file:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 8px 16px rgba(46, 125, 50, 0.3);
         }
 
         .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2e7d32 0%, #1a5c2a 100%);
             color: white;
             padding: 10px 16px;
             border-radius: 6px;
@@ -122,7 +376,7 @@
 
         .btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 8px 16px rgba(46, 125, 50, 0.3);
         }
 
         .btn:disabled {
@@ -132,7 +386,7 @@
 
         .btn-small {
             background: transparent;
-            color: #667eea;
+            color: #2e7d32;
             padding: 6px 10px;
             border-radius: 6px;
             border: 1px solid #e5e7eb;
@@ -142,8 +396,8 @@
         }
 
         .btn-small:hover:not(:disabled) {
-            background: #f3f4f6;
-            border-color: #667eea;
+            background: #f1f8f4;
+            border-color: #2e7d32;
         }
 
         .btn-small:disabled {
@@ -152,9 +406,9 @@
         }
 
         .btn-small.active {
-            background: #667eea;
+            background: #2e7d32;
             color: white;
-            border-color: #667eea;
+            border-color: #2e7d32;
         }
 
         .filename-display {
@@ -237,13 +491,13 @@
         }
 
         .message.agent .message-bubble {
-            background: #2563eb;
-            color: white;
+            background: #e8f5e9;
+            color: #1a5c2a;
             border-bottom-left-radius: 2px;
         }
 
         .message.patient .message-bubble {
-            background: #16a34a;
+            background: #2e7d32;
             color: white;
             border-bottom-right-radius: 2px;
         }
@@ -256,24 +510,25 @@
         }
 
         .message.interim.agent .message-bubble {
-            background: #93c5fd;
-            color: #1e3a8a;
+            background: #c8e6c9;
+            color: #1b5e20;
             border-bottom-left-radius: 2px;
         }
 
         .message.interim.patient .message-bubble {
-            background: #86efac;
-            color: #166534;
+            background: #a5d6a7;
+            color: #1b5e20;
             border-bottom-right-radius: 2px;
         }
 
         .banner {
-            padding: 10px 12px;
-            border-radius: 6px;
-            margin-bottom: 8px;
+            padding: 6px 10px;
+            border-radius: 4px;
+            margin-bottom: 4px;
             display: none;
-            border-left: 3px solid;
-            font-size: 12px;
+            border-left: 2px solid;
+            font-size: 11px;
+            flex-shrink: 0;
         }
 
         .banner.show {
@@ -310,8 +565,8 @@
 <body>
     <!-- Header -->
     <div class="header">
-        <h1>🏥 Copiloto Médico v6.2</h1>
-        <p>Transcripción con AssemblyAI + Diarización + Subtítulos Sincronizados</p>
+        <h1>🏥 Copiloto Médico v6.4.0</h1>
+        <p>AssemblyAI + OpenAI GPT-3.5 (o Ollama) + Análisis Progresivo</p>
     </div>
 
     <!-- Banners -->
@@ -320,9 +575,11 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Sección de carga y reproducción -->
-        <div class="section">
-            <div class="section-header">📤 Audio</div>
+        <!-- Contenido izquierdo -->
+        <div class="main-content-left">
+            <!-- Sección de carga y reproducción -->
+            <div class="section">
+                <div class="section-header">📤 Audio</div>
             <div class="section-body" style="gap: 8px;">
                 <div class="file-input-group">
                     <div class="file-input-wrapper">
@@ -344,18 +601,60 @@
             </div>
         </div>
 
-        <!-- Sección de transcripción -->
-        <div class="section">
-            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
-                <span>💬 Transcripción con Diarización</span>
-                <button class="btn-small" id="swapBtn" disabled title="Intercambiar Agente/Paciente">🔄</button>
-            </div>
-            <div class="section-body">
-                <div class="empty-state" id="emptyState">
-                    Carga un archivo y presiona Play para transcribir
+            <!-- Sección de transcripción -->
+            <div class="section">
+                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>💬 Transcripción con Diarización</span>
+                    <button class="btn-small" id="swapBtn" disabled title="Intercambiar Agente/Paciente">🔄</button>
                 </div>
-                <div class="chat-container" id="chatContainer" style="display: none;"></div>
+                <div class="section-body">
+                    <div class="empty-state" id="emptyState">
+                        Carga un archivo y presiona Play para transcribir
+                    </div>
+                    <div class="chat-container" id="chatContainer" style="display: none;"></div>
+                </div>
             </div>
+        </div>
+
+        <!-- Panel de Análisis con Ollama -->
+        <div id="analysisPanel">
+            <!-- PREGUNTAS SUGERIDAS - ELEMENTO PRINCIPAL -->
+            <div id="suggestedQuestionsContainer">
+                <strong>⭐ Preguntas Sugeridas</strong>
+                <div id="suggestedQuestions"></div>
+            </div>
+
+            <!-- DATOS DEL PACIENTE -->
+            <div id="patientData" class="analysis-section"></div>
+
+            <!-- NIVEL DE RIESGO - TRIAGE VISUAL -->
+            <div id="riskLevel" class="analysis-section">
+                <strong>🏥 Clasificación Triage</strong>
+                <div class="triage-container" id="triageContainer">
+                    <div class="triage-level negro inactive" data-level="bajo">
+                        <div class="triage-emoji">⬜</div>
+                        <div class="triage-label">Negro<br>Sin riesgo</div>
+                    </div>
+                    <div class="triage-level verde inactive" data-level="bajo">
+                        <div class="triage-emoji">🟢</div>
+                        <div class="triage-label">Verde<br>Consulta</div>
+                    </div>
+                    <div class="triage-level amarillo inactive" data-level="medio">
+                        <div class="triage-emoji">🟡</div>
+                        <div class="triage-label">Amarillo<br>Urgencia</div>
+                    </div>
+                    <div class="triage-level rojo inactive" data-level="alto">
+                        <div class="triage-emoji">🔴</div>
+                        <div class="triage-label">Rojo<br>Emergencia</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ALERTAS -->
+            <div id="alerts" class="analysis-section"></div>
+
+            <!-- RESUMEN CLÍNICO -->
+            <div id="summary" class="analysis-section"></div>
         </div>
     </div>
 
@@ -379,8 +678,44 @@
         const chatContainer = document.getElementById('chatContainer');
         const emptyState = document.getElementById('emptyState');
 
+        // ========== INICIALIZAR PANEL DE ANÁLISIS CON PLACEHOLDERS ==========
+        function initializeAnalysisPanel() {
+            const suggestedQuestionsDiv = document.getElementById('suggestedQuestions');
+            const patientDataDiv = document.getElementById('patientData');
+            const riskLevelDiv = document.getElementById('riskLevel');
+            const alertsDiv = document.getElementById('alerts');
+            const summaryDiv = document.getElementById('summary');
+            const triageContainer = document.getElementById('triageContainer');
+
+            // Preguntas sugeridas - placeholder
+            suggestedQuestionsDiv.innerHTML = '<div class="placeholder-content">⏳ Esperando transcripción de la llamada...</div>';
+
+            // Datos del paciente - placeholder
+            patientDataDiv.classList.add('empty');
+            patientDataDiv.innerHTML = '<strong>👤 Clasificación del Paciente</strong><div class="empty-text">[ Sin datos aún ]</div>';
+
+            // Nivel de riesgo - Triage placeholder
+            riskLevelDiv.classList.add('empty');
+            // Todos los triages comienzan inactivos
+            if (triageContainer) {
+                triageContainer.querySelectorAll('.triage-level').forEach(el => {
+                    el.classList.add('inactive');
+                    el.classList.remove('active');
+                });
+            }
+
+            // Alertas - placeholder
+            alertsDiv.classList.add('empty');
+            alertsDiv.innerHTML = '<strong>🚨 Alertas Importantes</strong><div class="empty-text">[ Sin datos aún ]</div>';
+
+            // Resumen/Siguiente paso - placeholder
+            summaryDiv.classList.add('empty');
+            summaryDiv.innerHTML = '<strong>⚡ Siguiente Paso</strong><div class="empty-text">[ Sin datos aún ]</div>';
+        }
+
         // ========== CONECTAR WEBSOCKET ==========
         window.addEventListener('load', () => {
+            initializeAnalysisPanel();
             connectWebSocket();
         });
 
@@ -400,20 +735,26 @@
             ws.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
-                    console.log('Mensaje WebSocket:', data.type);
+                    console.log('✉️ Mensaje WebSocket recibido:', data.type, data);
 
                     if (data.type === 'session_id') {
                         sessionId = data.id;
                         console.log('🔑 Session ID:', sessionId);
 
                     } else if (data.type === 'transcription') {
+                        console.log('🎤 Utterance recibido:', data);
                         handleTranscription(data);
 
+                    } else if (data.type === 'analysis') {
+                        console.log('🤖 Análisis recibido:', data.data);
+                        handleAnalysis(data.data, data.progressive || false);
+
                     } else if (data.type === 'status') {
-                        showInfo(data.message);
                         console.log('📊 Status:', data.message);
+                        showInfo(data.message);
 
                     } else if (data.type === 'error') {
+                        console.error('❌ Error:', data.message);
                         showError(data.message);
                     }
                 } catch (e) {
@@ -450,9 +791,22 @@
         let hasTranscription = false;
         let isTranscribing = false;
 
+        // Variables para análisis progresivo
+        let accumulatedText = ""; // Texto acumulado para enviar a análisis
+        let lastAnalyzedIndex = -1; // Último índice que fue incluido en análisis
+        let analysisInProgress = false; // Flag para evitar análisis simultáneos
+
         audioFile.addEventListener('change', async (e) => {
             selectedFile = e.target.files[0];
             if (selectedFile) {
+                // Resetear variables de transcripción y análisis
+                transcriptionQueue = [];
+                lastDisplayedIndex = -1;
+                lastAnalyzedIndex = -1;
+                accumulatedText = "";
+                analysisInProgress = false;
+                chatContainer.innerHTML = ''; // Limpiar chat anterior
+
                 const fileUrl = URL.createObjectURL(selectedFile);
                 audioElement.src = fileUrl;
 
@@ -466,7 +820,8 @@
                 hasTranscription = false;
                 chatContainer.innerHTML = '';
                 emptyState.style.display = 'flex';
-                audioElement.classList.add('disabled'); // Deshabilitar Play hasta que lleguen datos
+                // El audio se carga pero el análisis llegará después
+                // No bloqueamos el Play - el usuario puede empezar a escuchar inmediatamente
 
                 console.log('🎵 Archivo seleccionado:', selectedFile.name);
                 showInfo('⏳ Analizando audio con AssemblyAI...');
@@ -517,21 +872,25 @@
         // ========== FLUJO DE REPRODUCCIÓN ==========
         audioElement.addEventListener('play', async () => {
             if (isStreaming) {
+                console.log('⚠️ Ya estaba reproduciéndose');
                 return; // Ya está reproduciendo
             }
 
-            // Verificar que tenemos transcripción lista
-            if (!hasTranscription) {
-                console.warn('⚠️ Transcripción no lista aún');
-                audioElement.pause();
-                showError('Espera a que se complete el análisis');
-                return;
-            }
-
+            // El usuario puede presionar Play en cualquier momento
+            // La transcripción llegará en background mientras escucha
             isStreaming = true;
-            console.log('▶️ Play detectado - reproduciendo con subtítulos sincronizados');
-            showInfo('🎤 Reproduciendo con subtítulos sincronizados...');
-            // El evento timeupdate se encargará de mostrar los subtítulos
+            console.log(`▶️ Play detectado - reproduciendo audio`);
+            console.log(`📊 Estado: hasTranscription=${hasTranscription}, queue.length=${transcriptionQueue.length}`);
+            console.log(`📋 Cola actual:`, transcriptionQueue);
+
+            if (hasTranscription) {
+                showInfo('🎤 Reproduciendo con análisis en tiempo real...');
+                console.log('✅ Transcripción lista - mostrando subtítulos...');
+                // El evento timeupdate mostrará los subtítulos
+            } else {
+                showInfo('🎤 Escuchando... el análisis llegará en unos momentos');
+                console.log('⏳ Esperando transcripción...');
+            }
         });
 
         audioElement.addEventListener('pause', () => {
@@ -549,32 +908,37 @@
             showInfo('✓ Reproducción finalizada');
         });
 
-        // ========== SINCRONIZACIÓN DINÁMICA DE SUBTÍTULOS ==========
-        // Se dispara en cada timeupdate del audio
+        // ========== SINCRONIZACIÓN DINÁMICA DE SUBTÍTULOS + ANÁLISIS PROGRESIVO ==========
+        // Se dispara en cada timeupdate del audio (cada ~250ms)
         function updateTranscriptionDisplay() {
             // Verificar precondiciones
             if (transcriptionQueue.length === 0) {
+                console.debug(`⏭️ updateTranscriptionDisplay: cola vacía`);
                 return;
             }
 
             if (audioElement.paused) {
-                // No mostrar nada si el audio está pausado
+                console.debug(`⏸️ updateTranscriptionDisplay: audio pausado`);
                 return;
             }
 
             const currentTime = audioElement.currentTime;
+            console.debug(`⏱️ updateTranscriptionDisplay @ ${currentTime.toFixed(2)}s, mostrada: ${lastDisplayedIndex}/${transcriptionQueue.length}, analizada: ${lastAnalyzedIndex}`);
 
             // Mostrar todos los utterances que corresponden al tiempo actual
             for (let i = lastDisplayedIndex + 1; i < transcriptionQueue.length; i++) {
                 const utterance = transcriptionQueue[i];
 
+                console.debug(`  [${i}] Utterance ${i}: [${utterance.start.toFixed(2)}-${utterance.end.toFixed(2)}s] Speaker ${utterance.speaker}`);
+
                 // Si aún no es tiempo de mostrar este utterance, detener
                 if (currentTime < utterance.start) {
+                    console.debug(`    ⏳ No es tiempo aún (actual: ${currentTime.toFixed(2)}, start: ${utterance.start.toFixed(2)})`);
                     break;
                 }
 
                 // El tiempo llegó, mostrar este utterance
-                console.log(`📝 [@${currentTime.toFixed(2)}s] Mostrando: ${utterance.text}`);
+                console.log(`✅ [@${currentTime.toFixed(2)}s] Mostrando utterance #${i}: "${utterance.text.substring(0, 40)}..."`);
 
                 // Crear mensaje en el chat
                 const messageDiv = document.createElement('div');
@@ -597,13 +961,187 @@
                 // Actualizar índice
                 lastDisplayedIndex = i;
 
+                // ========== ANÁLISIS PROGRESIVO CADA 2 UTTERANCES ==========
+                // Acumular texto de utterances nuevos
+                if (i > lastAnalyzedIndex) {
+                    const speaker = actualSpeaker === 0 ? 'Paciente' : 'Doctor';
+                    accumulatedText += `${speaker}: ${utterance.text}\n`;
+                }
+
+                // Si hemos mostrado 2 utterances nuevos desde el último análisis, analizar
+                const utterancesSinceLastAnalysis = lastDisplayedIndex - lastAnalyzedIndex;
+                if (utterancesSinceLastAnalysis >= 2 && !analysisInProgress) {
+                    console.log(`📊 Disparando análisis: ${utterancesSinceLastAnalysis} utterances nuevos`);
+                    requestProgressiveAnalysis();
+                    lastAnalyzedIndex = lastDisplayedIndex; // Marcar estos como analizados
+                }
+
                 // Auto-scroll
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
         }
 
+        // ========== ANÁLISIS PROGRESIVO BAJO DEMANDA ==========
+        function requestProgressiveAnalysis() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                console.warn('⚠️ WebSocket no conectado para análisis');
+                return;
+            }
+
+            if (analysisInProgress) {
+                console.debug('⏳ Análisis ya en progreso');
+                return;
+            }
+
+            if (!accumulatedText.trim()) {
+                console.debug('⏭️ Sin texto acumulado para analizar');
+                return;
+            }
+
+            analysisInProgress = true;
+            const charCount = accumulatedText.length;
+            const wordCount = accumulatedText.split(/\s+/).length;
+            console.log(`📤 Solicitando análisis: ${charCount} caracteres, ~${wordCount} palabras`);
+            console.log(`📝 Texto acumulado:\n${accumulatedText}`);
+            showInfo(`⏳ Analizando progresivamente (${wordCount} palabras)...`);
+
+            // Enviar mensaje de análisis al backend
+            ws.send(JSON.stringify({
+                type: "analyze",
+                text: accumulatedText
+            }));
+
+            // Timeout para liberar flag si no hay respuesta
+            setTimeout(() => {
+                if (analysisInProgress) {
+                    analysisInProgress = false;
+                    console.warn('⚠️ Timeout en análisis (5s), permitiendo siguiente');
+                }
+            }, 5000);
+        }
+
         // Agregar evento timeupdate para sincronización
         audioElement.addEventListener('timeupdate', updateTranscriptionDisplay);
+
+        // ========== MANEJAR ANÁLISIS CON OLLAMA ==========
+        function handleAnalysis(analysis, isProgressive = false) {
+            console.log(`🤖 Análisis ${isProgressive ? 'progresivo' : 'final'} recibido:`, analysis);
+
+            const analysisPanel = document.getElementById('analysisPanel');
+            const suggestedQuestionsDiv = document.getElementById('suggestedQuestions');
+            const patientDataDiv = document.getElementById('patientData');
+            const riskLevelDiv = document.getElementById('riskLevel');
+            const alertsDiv = document.getElementById('alerts');
+            const summaryDiv = document.getElementById('summary');
+
+            // ===== PREGUNTAS SUGERIDAS (Elemento Principal) =====
+            if (analysis.preguntas_sugeridas && analysis.preguntas_sugeridas.length > 0) {
+                suggestedQuestionsDiv.innerHTML = '';
+                analysis.preguntas_sugeridas.forEach((q, i) => {
+                    const questionBtn = document.createElement('div');
+                    questionBtn.className = 'suggestion-item';
+                    questionBtn.innerHTML = `<strong>#${i + 1}</strong><br>${q}`;
+                    questionBtn.style.cursor = 'pointer';
+                    questionBtn.addEventListener('click', () => {
+                        console.log(`📋 Pregunta seleccionada: ${q}`);
+                        showInfo(`Pregunta agregada: "${q}"`);
+                    });
+                    suggestedQuestionsDiv.appendChild(questionBtn);
+                });
+            } else {
+                suggestedQuestionsDiv.innerHTML = '<div class="placeholder-content">⏳ Analizando...</div>';
+            }
+
+            // ===== DATOS DEL PACIENTE =====
+            const paciente = analysis.datos_paciente || {};
+            let patientHTML = '<strong>👤 Clasificación del Paciente</strong>';
+            let hasPatientData = false;
+
+            if (paciente.nombre && paciente.nombre !== 'null') {
+                patientHTML += `<div class="patient-item"><strong>Nombre:</strong> ${paciente.nombre}</div>`;
+                hasPatientData = true;
+            }
+
+            if (paciente.sintomas && paciente.sintomas.length > 0) {
+                patientHTML += `<div class="patient-item"><strong>Síntomas detectados:</strong><br>${paciente.sintomas.map(s => `• ${s}`).join('<br>')}</div>`;
+                hasPatientData = true;
+            }
+
+            if (paciente.medicamentos && paciente.medicamentos.length > 0) {
+                patientHTML += `<div class="patient-item"><strong>Medicamentos:</strong><br>${paciente.medicamentos.map(m => `• ${m}`).join('<br>')}</div>`;
+                hasPatientData = true;
+            }
+
+            if (paciente.alergias && paciente.alergias.length > 0) {
+                patientHTML += `<div class="patient-item alert-text"><strong>🚨 ALERGIAS:</strong><br>${paciente.alergias.map(a => `• ${a}`).join('<br>')}</div>`;
+                hasPatientData = true;
+            }
+
+            if (!hasPatientData) {
+                patientHTML += '<div class="empty-text">[ Sin datos aún ]</div>';
+                patientDataDiv.classList.add('empty');
+            } else {
+                patientDataDiv.classList.remove('empty');
+            }
+
+            patientDataDiv.innerHTML = patientHTML;
+
+            // ===== NIVEL DE RIESGO - TRIAGE VISUAL =====
+            const riskLevel = (analysis.nivel_riesgo || 'bajo').toLowerCase();
+            console.log(`📊 Actualizando triage a nivel: ${riskLevel}`);
+
+            riskLevelDiv.classList.remove('empty');
+
+            // Mapeo de niveles de riesgo a colores de triage
+            let activeTriage = 'verde'; // default
+            if (riskLevel === 'bajo' || riskLevel === 'desconocido') {
+                activeTriage = 'verde';
+            } else if (riskLevel === 'medio') {
+                activeTriage = 'amarillo';
+            } else if (riskLevel === 'alto' || riskLevel === 'crítico') {
+                activeTriage = 'rojo';
+            }
+
+            // Actualizar elementos de triage
+            const triageContainer = document.getElementById('triageContainer');
+            if (triageContainer) {
+                // Remover clase 'active' de todos
+                triageContainer.querySelectorAll('.triage-level').forEach(el => {
+                    el.classList.remove('active');
+                    el.classList.add('inactive');
+                });
+
+                // Activar el nivel correcto
+                const activeLevel = triageContainer.querySelector(`.triage-level.${activeTriage}`);
+                if (activeLevel) {
+                    activeLevel.classList.remove('inactive');
+                    activeLevel.classList.add('active');
+                    console.log(`✅ Triage activado: ${activeTriage}`);
+                }
+            }
+
+            // ===== ALERTAS =====
+            alertsDiv.classList.remove('empty');
+            if (analysis.alertas && analysis.alertas.length > 0) {
+                alertsDiv.innerHTML = '<strong>🚨 Alertas Importantes</strong>';
+                analysis.alertas.forEach(alert => {
+                    alertsDiv.innerHTML += `<div class="alert-text">⚠️ ${alert}</div>`;
+                });
+            } else {
+                alertsDiv.innerHTML = '<strong>🚨 Alertas Importantes</strong><div style="color: #16a34a; margin-top: 6px;">✓ Sin alertas detectadas</div>';
+            }
+
+            // ===== RESUMEN CLÍNICO =====
+            summaryDiv.classList.remove('empty');
+            summaryDiv.innerHTML = `<strong>⚡ Siguiente Paso</strong><div style="margin-top: 8px; color: #374151;">${analysis.resumen || 'Analizando...'}</div>`;
+
+            // Mostrar panel (ya está visible por defecto)
+            analysisPanel.style.display = 'flex';
+
+            if (!isProgressive) {
+                showInfo('✅ Análisis completado - Revisa el panel derecho');
+            }
+        }
 
         // ========== INTERCAMBIAR SPEAKERS ==========
         document.getElementById('swapBtn').addEventListener('click', () => {
@@ -638,11 +1176,14 @@
         function handleTranscription(data) {
             const { text, speaker, start, end, is_final } = data;
 
+            console.log(`📝 handleTranscription() llamado con:`, { text, speaker, start, end, is_final });
+
             if (!text || !text.trim()) {
+                console.warn('⚠️ Texto vacío en utterance, ignorando');
                 return;
             }
 
-            console.log(`🎤 Speaker ${speaker}: ${text} [${start.toFixed(2)}s - ${end.toFixed(2)}s] (final: ${is_final})`);
+            console.log(`✅ Agregando a cola: Speaker ${speaker}: ${text} [${start?.toFixed?.(2) || start}s - ${end?.toFixed?.(2) || end}s] (final: ${is_final})`);
 
             // Almacenar SOLO en la cola - NO mostrar todavía
             transcriptionQueue.push({
@@ -652,9 +1193,12 @@
                 end: end || 0
             });
 
+            console.log(`📊 Cola actual: ${transcriptionQueue.length} utterances`);
+
             // Si es final, marcar como listo y habilitar reproducción
             if (is_final) {
-                console.log(`✅ Transcripción completada - ${transcriptionQueue.length} utterances en cola`);
+                console.log(`✅ TRANSCRIPCIÓN LISTA - ${transcriptionQueue.length} utterances en cola`);
+                console.log('📋 Utterances actuales:', transcriptionQueue);
                 hasTranscription = true;
                 isTranscribing = false;
                 lastDisplayedIndex = -1; // Resetear para que empiece desde el primero
@@ -663,14 +1207,16 @@
                 audioElement.classList.remove('disabled');
                 audioElement.currentTime = 0;
 
-                // Mostrar chat (vacío por ahora)
+                // Mostrar chat
                 if (emptyState.style.display !== 'none') {
+                    console.log('🔄 Ocultando empty state, mostrando chat container');
                     emptyState.style.display = 'none';
                     chatContainer.style.display = 'flex';
                     document.getElementById('swapBtn').disabled = false;
+                    showInfo('✅ Transcripción lista - presiona Play para reproducir con subtítulos');
+                } else {
+                    console.log('ℹ️ Chat container ya visible (más utterances llegando)');
                 }
-
-                showInfo('✅ Análisis completado - presiona Play para reproducir con subtítulos');
             }
         }
 

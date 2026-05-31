@@ -1,10 +1,11 @@
-# Copiloto Médico - Transcripción de Audio con Diarización
+# Copiloto Médico - Transcripción con Análisis IA
 
-Sistema de transcripción y diarización de llamadas médicas usando **AssemblyAI** para procesar audio completo con identificación automática de speaker (Paciente/Doctor).
+Sistema de transcripción y diarización de llamadas médicas con análisis inteligente usando **AssemblyAI** para transcripción y **OpenAI GPT-3.5** o **Ollama/llama3.2** para análisis.
 
-**Versión:** 6.2.0
-**Tipo de procesamiento:** Batch (análisis completo antes de reproducción)
-**Resultado:** Transcripción perfectamente sincronizada con subtítulos
+**Versión:** 6.4.0
+**Arquitectura:** AssemblyAI (transcripción) + OpenAI GPT-3.5 (análisis primario) + Ollama/llama3.2 (fallback)
+**Tipo de procesamiento:** Batch (análisis progresivo mientras se reproduce)
+**Resultado:** Transcripción sincronizada + análisis de riesgo en tiempo real
 
 ---
 
@@ -68,10 +69,10 @@ Ahora el prompt debería mostrar `(medical-copilot)` en lugar de `(base)`.
 ### Paso 5: Instalar dependencias
 
 ```bash
-pip install fastapi uvicorn websockets httpx python-dotenv pydub
+pip install fastapi uvicorn websockets httpx python-dotenv pydub openai ollama
 ```
 
-*(Toma ~1-2 minutos)*
+*(Toma ~2-3 minutos)*
 
 ### Paso 6: Instalar FFmpeg
 
@@ -99,7 +100,7 @@ Deberías ver Python 3.11.x y fastapi, uvicorn, etc. en la lista.
 
 ## API KEYS NECESARIAS
 
-### AssemblyAI (OBLIGATORIO)
+### AssemblyAI (OBLIGATORIO - Transcripción)
 
 **Obtener API Key:**
 1. Ve a https://www.assemblyai.com/
@@ -114,6 +115,31 @@ Deberías ver Python 3.11.x y fastapi, uvicorn, etc. en la lista.
 - Plan Free: $0 (3 horas/mes)
 - Después: $0.10 por minuto de audio
 
+### OpenAI (RECOMENDADO - Análisis IA)
+
+**Obtener API Key:**
+1. Ve a https://platform.openai.com/
+2. Sign up o login
+3. Ingresa al dashboard
+4. API Keys → Create new secret key
+5. Copia tu API key
+
+**Costo:**
+- GPT-3.5-turbo: ~$0.0005 por 1000 tokens
+- **Primeros $5 gratis** (durante 3 meses)
+
+**Si NO tienes OpenAI:**
+- El sistema usa **Ollama/llama3.2** automáticamente como fallback
+- Ollama es GRATUITO pero requiere descarga previa
+
+### Ollama (OPCIONAL - Fallback si no tienes OpenAI)
+
+Si no configuras OpenAI, se usa Ollama automáticamente:
+1. Descarga Ollama: https://ollama.ai/
+2. Instala y ejecuta
+3. En terminal: `ollama pull llama3.2`
+4. El copiloto lo detectará automáticamente
+
 ---
 
 ## CONFIGURACIÓN DEL ARCHIVO .env
@@ -126,7 +152,13 @@ En la carpeta del proyecto, crea un archivo `.env` (sin extensión):
 2. Copia esto:
 
 ```
+# TRANSCRIPCIÓN (OBLIGATORIO)
 ASSEMBLYAI_API_KEY=tu_api_key_aqui
+
+# ANÁLISIS IA (RECOMENDADO - OpenAI es más rápido y preciso)
+OPENAI_API_KEY=sk-your-api-key-here
+
+# SERVIDOR
 HOST=127.0.0.1
 PORT=8000
 LOG_LEVEL=INFO
@@ -137,18 +169,30 @@ LOG_LEVEL=INFO
    - Nombre: `.env`
    - Tipo: "All files (*.*)"
 
-### Agregar tu API Key
+### Agregar tus API Keys
 
-Reemplaza `tu_api_key_aqui` con tu verdadera API Key:
-
+**Para AssemblyAI (obligatorio):**
 ```
 ASSEMBLYAI_API_KEY=abc123def456ghi789jkl
 ```
 
-Verifica:
+**Para OpenAI (recomendado):**
+```
+OPENAI_API_KEY=sk-proj-XXXXXXXXXXXXXX
+```
+
+**¿Sin OpenAI?** No hay problema:
+```
+# OPENAI_API_KEY=         # Comentado o vacío = usa Ollama automáticamente
+```
+
+### Verificar configuración
+
 ```bash
 type .env
 ```
+
+Deberías ver tus API keys configuradas.
 
 ---
 
@@ -164,8 +208,9 @@ python main.py
 
 Deberías ver:
 ```
-🚀 Iniciando Copiloto Médico v6.2.0 (AssemblyAI - Batch Processing)
+🚀 Iniciando Copiloto Médico v6.4.0 (AssemblyAI + OpenAI/Ollama)
 ✅ Servidor listo en http://127.0.0.1:8000
+ℹ️ Análisis: OpenAI (recomendado) o Ollama (fallback)
 ```
 
 ### Crear archivo batch (doble clic para ejecutar)

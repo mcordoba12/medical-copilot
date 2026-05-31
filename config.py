@@ -17,5 +17,8 @@ DEEPGRAM_INTERIM_RESULTS = os.getenv("DEEPGRAM_INTERIM_RESULTS", "true")
 # AssemblyAI
 ASSEMBLYAI_API_KEY = os.getenv("ASSEMBLYAI_API_KEY", "")
 
+# OpenAI
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+
 # Logging
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")

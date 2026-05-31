@@ -7,6 +7,7 @@ import uuid
 import tempfile
 import httpx
 import traceback
+import re
 from datetime import datetime
 from fastapi import FastAPI, WebSocket, UploadFile, File, Form
 from fastapi.responses import FileResponse, JSONResponse
@@ -14,11 +15,14 @@ from fastapi.staticfiles import StaticFiles
 import websockets
 from pydub import AudioSegment
 from pydub.utils import mediainfo
+import ollama
+from openai import AsyncOpenAI
 from config import (
     HOST, PORT, LOG_LEVEL,
     DEEPGRAM_API_KEY,
     DEEPGRAM_LANGUAGE, DEEPGRAM_MODEL, DEEPGRAM_PUNCTUATE,
     ASSEMBLYAI_API_KEY,
+    OPENAI_API_KEY,
 )
 
 logging.basicConfig(
@@ -27,10 +31,194 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Copiloto Médico", version="5.1.0")
+app = FastAPI(title="Copiloto Médico", version="6.4.0")
 
 # Conexiones WebSocket activas: { websocket_id: WebSocket }
 active_connections = {}
+
+
+# ========== EXTRACTOR JSON ROBUSTO ==========
+def extract_json(text: str) -> dict:
+    """Extrae JSON de texto, manejando formatos mal formados.
+
+    Intenta múltiples estrategias:
+    1. Parse directo
+    2. Buscar JSON entre llaves
+    3. Limpiar caracteres problemáticos
+    4. Retornar estructura por defecto si todo falla
+    """
+    try:
+        # Intento 1: parsear directo
+        return json.loads(text)
+    except Exception as e:
+        logger.debug(f"Parse directo falló: {e}")
+
+    try:
+        # Intento 2: buscar JSON entre llaves
+        match = re.search(r'\{.*\}', text, re.DOTALL)
+        if match:
+            return json.loads(match.group())
+    except Exception as e:
+        logger.debug(f"Buscar entre llaves falló: {e}")
+
+    try:
+        # Intento 3: limpiar caracteres problemáticos y reintentar
+        cleaned = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', text)
+        match = re.search(r'\{.*\}', cleaned, re.DOTALL)
+        if match:
+            json_str = match.group()
+            logger.debug(f"JSON limpiado: {json_str[:200]}...")
+            return json.loads(json_str)
+    except Exception as e:
+        logger.debug(f"Limpieza y parse falló: {e}")
+
+    # Retornar estructura por defecto si todo falla
+    logger.warning(f"⚠️ No se pudo extraer JSON de: {text[:100]}...")
+    return {
+        "preguntas_sugeridas": ["¿Cuál es el motivo de su llamada?"],
+        "datos_paciente": {"nombre": None, "sintomas": [], "medicamentos": [], "alergias": []},
+        "nivel_riesgo": "bajo",
+        "alertas": [],
+        "resumen": "Analizando..."
+    }
+
+
+# ========== ANÁLISIS CON OPENAI/GPT-3.5 ==========
+async def analyze_with_openai(transcript_text: str) -> dict:
+    """Analizar transcripción con OpenAI GPT-3.5-turbo
+
+    Extrae:
+    - Preguntas sugeridas para seguimiento
+    - Clasificación del paciente
+    - Datos del paciente
+    - Nivel de riesgo
+    - Alertas importantes
+    - Siguiente paso recomendado
+    """
+    try:
+        logger.info("🤖 Iniciando análisis con OpenAI (GPT-3.5-turbo)...")
+
+        client = AsyncOpenAI(api_key=OPENAI_API_KEY)
+
+        response = await client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Eres un asistente especializado en admisión médica telefónica. Responde SOLO con JSON válido, sin texto adicional."
+                },
+                {
+                    "role": "user",
+                    "content": f"""Analiza esta transcripción de llamada médica y responde SOLO con JSON:
+
+TRANSCRIPCIÓN:
+{transcript_text}
+
+JSON requerido:
+{{
+  "preguntas_sugeridas": ["pregunta1", "pregunta2", "pregunta3"],
+  "datos_paciente": {{
+    "nombre": null,
+    "sintomas": [],
+    "medicamentos": [],
+    "alergias": []
+  }},
+  "nivel_riesgo": "bajo|medio|alto|crítico",
+  "alertas": [],
+  "resumen": "resumen breve de la llamada"
+}}"""
+                }
+            ],
+            temperature=0.3,
+            response_format={"type": "json_object"}
+        )
+
+        text = response.choices[0].message.content
+        logger.debug(f"Respuesta OpenAI: {text[:200]}...")
+
+        # Extraer JSON con función robusta
+        analysis = extract_json(text)
+        logger.info(f"✅ Análisis OpenAI completado - Riesgo: {analysis.get('nivel_riesgo', 'desconocido')}")
+
+        return analysis
+
+    except Exception as e:
+        logger.error(f"❌ Error en análisis OpenAI: {e}")
+        logger.info("⚠️ Fallback a Ollama...")
+        return await analyze_with_ollama(transcript_text)
+
+
+# ========== FUNCIÓN PRINCIPAL DE ANÁLISIS ==========
+async def analyze(transcript_text: str) -> dict:
+    """Selector de análisis: OpenAI si está disponible, Ollama como fallback"""
+    if OPENAI_API_KEY:
+        logger.debug("📊 Usando OpenAI para análisis")
+        return await analyze_with_openai(transcript_text)
+    else:
+        logger.debug("📊 Usando Ollama para análisis (OpenAI no configurado)")
+        return await analyze_with_ollama(transcript_text)
+
+
+# ========== ANÁLISIS CON OLLAMA/LLAMA3.2 ==========
+async def analyze_with_ollama(transcript_text: str) -> dict:
+    """Analizar transcripción con Ollama usando llama3.2
+
+    Extrae:
+    - Preguntas sugeridas para seguimiento
+    - Datos del paciente (nombre, síntomas, medicamentos, alergias)
+    - Nivel de riesgo
+    - Alertas importantes
+    - Resumen de la llamada
+    """
+    try:
+        logger.info("🤖 Iniciando análisis con Ollama (llama3.2)...")
+
+        prompt = f"""Eres un asistente de admisión médica inteligente.
+Analiza esta transcripción de llamada médica y extrae información relevante.
+
+TRANSCRIPCIÓN:
+{transcript_text}
+
+Responde EXACTAMENTE con este JSON válido, sin texto adicional:
+{{
+  "preguntas_sugeridas": ["pregunta1", "pregunta2", "pregunta3"],
+  "datos_paciente": {{
+    "nombre": null,
+    "sintomas": [],
+    "medicamentos": [],
+    "alergias": []
+  }},
+  "nivel_riesgo": "bajo",
+  "alertas": [],
+  "resumen": "resumen breve de la llamada"
+}}"""
+
+        # Llamar a Ollama (asincrónico)
+        response = await asyncio.to_thread(
+            ollama.chat,
+            model="llama3.2",
+            messages=[{"role": "user", "content": prompt}],
+            stream=False
+        )
+
+        text = response['message']['content']
+        logger.debug(f"Respuesta Ollama: {text[:200]}...")
+
+        # Extraer JSON con función robusta
+        analysis = extract_json(text)
+        logger.info(f"✅ Análisis completado - Riesgo: {analysis.get('nivel_riesgo', 'desconocido')}")
+
+        return analysis
+
+    except Exception as e:
+        logger.error(f"❌ Error en análisis Ollama: {e}")
+        return {
+            "preguntas_sugeridas": ["¿Cuál es el motivo de su llamada?"],
+            "datos_paciente": {"nombre": None, "sintomas": [], "medicamentos": [], "alergias": []},
+            "nivel_riesgo": "bajo",
+            "alertas": [],
+            "resumen": "Analizando..."
+        }
 
 if not ASSEMBLYAI_API_KEY:
     logger.error("❌ ASSEMBLYAI_API_KEY no configurada en .env")
@@ -360,20 +548,30 @@ async def transcribe_with_assemblyai(audio_data: bytes, client_ws):
                     utterances = data.get("utterances", [])
                     logger.info(f"📊 {len(utterances)} utterances detectadas")
 
+                    # Acumular texto para análisis progresivo
+                    full_transcript = ""
+                    utterances_count = 0
+
                     # Procesar y enviar utterances
                     for i, utt in enumerate(utterances):
                         # Convertir speaker label (A, B, etc.) a número (0, 1, etc.)
                         speaker = ord(utt.get("speaker", "A")) - ord("A")
                         text = utt.get("text", "").strip()
+                        speaker_name = "Paciente" if speaker == 0 else "Doctor"
 
                         if text and client_ws:
-                            # Solo marcar como final el último utterance
-                            is_final = (i == len(utterances) - 1)
+                            # Acumular para análisis progresivo
+                            full_transcript += f"{speaker_name}: {text}\n"
+                            utterances_count += 1
+
+                            # Con AssemblyAI batch, todos los utterances están disponibles
+                            # Marcar el PRIMERO como final para que el frontend muestre el chat inmediatamente
+                            is_final = (i == 0) or (i == len(utterances) - 1)
                             await client_ws.send_json({
                                 "type": "transcription",
                                 "text": text,
                                 "speaker": speaker,
-                                "start": utt.get("start", 0) / 1000,  # Convertir ms a segundos
+                                "start": utt.get("start", 0) / 1000,
                                 "end": utt.get("end", 0) / 1000,
                                 "is_final": is_final
                             })
@@ -567,10 +765,47 @@ async def websocket_audio_stream(websocket: WebSocket):
                         })
 
                 elif "text" in message:
-                    msg_text = message.get("text", "").lower()
-                    if msg_text in ["close", "end", "finish"]:
-                        logger.info(f"Cierre solicitado por cliente")
-                        break
+                    try:
+                        data = json.loads(message.get("text", "{}"))
+
+                        # Análisis BAJO DEMANDA desde el frontend
+                        if data.get("type") == "analyze":
+                            transcript_text = data.get("text", "")
+                            logger.info(f"📊 Análisis bajo demanda: {len(transcript_text)} caracteres")
+
+                            try:
+                                analysis = await analyze(transcript_text)
+                                await websocket.send_json({
+                                    "type": "analysis",
+                                    "data": analysis,
+                                    "progressive": True
+                                })
+                                logger.info(f"✅ Análisis enviado al frontend")
+                            except Exception as e:
+                                logger.error(f"❌ Error en análisis: {e}")
+                                # Enviar análisis vacío para que no se cuelgue
+                                await websocket.send_json({
+                                    "type": "analysis",
+                                    "data": {
+                                        "preguntas_sugeridas": [],
+                                        "datos_paciente": {"nombre": None, "sintomas": [], "medicamentos": [], "alergias": []},
+                                        "nivel_riesgo": "bajo",
+                                        "alertas": [],
+                                        "resumen": "Analizando..."
+                                    },
+                                    "progressive": True
+                                })
+
+                        # Control de cierre
+                        elif data.get("type") in ["close", "end", "finish"] or message.get("text", "").lower() in ["close", "end", "finish"]:
+                            logger.info(f"Cierre solicitado por cliente")
+                            break
+                    except json.JSONDecodeError:
+                        # Si no es JSON válido, tratar como mensaje de cierre
+                        msg_text = message.get("text", "").lower()
+                        if msg_text in ["close", "end", "finish"]:
+                            logger.info(f"Cierre solicitado por cliente")
+                            break
 
             except asyncio.TimeoutError:
                 logger.info(f"⏱️ Timeout esperando datos")
@@ -636,7 +871,7 @@ async def websocket_transcript(websocket: WebSocket):
 @app.on_event("startup")
 async def startup():
     """Inicia el servidor"""
-    logger.info("🚀 Iniciando Copiloto Médico v6.2.0 (AssemblyAI - Batch Processing)")
+    logger.info("🚀 Iniciando Copiloto Médico v6.3.1 (AssemblyAI + Análisis IA Progresivo)")
     logger.info(f"✅ Servidor listo en http://{HOST}:{PORT}")
 
     if ASSEMBLYAI_API_KEY:
@@ -646,6 +881,9 @@ async def startup():
     else:
         logger.error("❌ ASSEMBLYAI_API_KEY no configurada")
         logger.error("❌ Transcripción no disponible sin AssemblyAI")
+
+    logger.info("🤖 Ollama: ✅ Integrado (análisis con llama3.2)")
+    logger.info("📝 Análisis automático: ✅ Preguntas, riesgo, alertas")
 
     # DEEPGRAM - DESACTIVADO TEMPORALMENTE
     # if DEEPGRAM_API_KEY:
