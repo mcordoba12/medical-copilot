@@ -17,12 +17,14 @@ from pydub import AudioSegment
 from pydub.utils import mediainfo
 import ollama
 from openai import AsyncOpenAI
+# import google.generativeai as genai  # Descomenta para usar Google Gemini
 from config import (
     HOST, PORT, LOG_LEVEL,
     DEEPGRAM_API_KEY,
     DEEPGRAM_LANGUAGE, DEEPGRAM_MODEL, DEEPGRAM_PUNCTUATE,
     ASSEMBLYAI_API_KEY,
     OPENAI_API_KEY,
+    # GEMINI_API_KEY,  # Descomenta para usar Google Gemini
 )
 
 logging.basicConfig(
@@ -148,14 +150,88 @@ JSON requerido:
         return await analyze_with_ollama(transcript_text)
 
 
+# ========== ANÁLISIS CON GOOGLE GEMINI (COMENTADO - DESCOMENTA PARA USAR) ==========
+# async def analyze_with_gemini(transcript_text: str) -> dict:
+#     """Analizar transcripción con Google Gemini API
+#
+#     Extrae:
+#     - Preguntas sugeridas para seguimiento
+#     - Datos del paciente
+#     - Nivel de riesgo
+#     - Alertas importantes
+#     - Resumen de la llamada
+#     """
+#     try:
+#         logger.info("🤖 Iniciando análisis con Google Gemini (gemini-1.5-flash)...")
+#
+#         genai.configure(api_key=GEMINI_API_KEY)
+#         model = genai.GenerativeModel('gemini-1.5-flash')
+#
+#         prompt = f"""Eres un asistente especializado en admisión médica telefónica.
+# Analiza esta transcripción de llamada médica y responde SOLO con JSON válido, sin texto adicional.
+#
+# TRANSCRIPCIÓN:
+# {transcript_text}
+#
+# JSON requerido (responde EXACTAMENTE así):
+# {{
+#   "preguntas_sugeridas": ["pregunta1", "pregunta2", "pregunta3"],
+#   "datos_paciente": {{
+#     "nombre": null,
+#     "sintomas": [],
+#     "medicamentos": [],
+#     "alergias": []
+#   }},
+#   "nivel_riesgo": "bajo|medio|alto|crítico",
+#   "alertas": [],
+#   "resumen": "resumen breve de la llamada"
+# }}"""
+#
+#         # Llamar a Gemini (usar executor para no bloquear)
+#         loop = asyncio.get_event_loop()
+#         response = await loop.run_in_executor(
+#             None,
+#             lambda: model.generate_content(prompt)
+#         )
+#
+#         text = response.text
+#         logger.debug(f"Respuesta Gemini: {text[:200]}...")
+#
+#         # Limpiar markdown si existe
+#         text = re.sub(r'```json\n?', '', text)
+#         text = re.sub(r'```\n?', '', text)
+#
+#         # Extraer JSON con función robusta
+#         analysis = extract_json(text)
+#         logger.info(f"✅ Análisis Gemini completado - Riesgo: {analysis.get('nivel_riesgo', 'desconocido')}")
+#
+#         return analysis
+#
+#     except Exception as e:
+#         logger.error(f"❌ Error en análisis Gemini: {e}")
+#         logger.info("⚠️ Fallback a OpenAI...")
+#         # Fallback a OpenAI si Gemini falla
+#         if OPENAI_API_KEY:
+#             return await analyze_with_openai(transcript_text)
+#         else:
+#             return await analyze_with_ollama(transcript_text)
+
+
 # ========== FUNCIÓN PRINCIPAL DE ANÁLISIS ==========
 async def analyze(transcript_text: str) -> dict:
-    """Selector de análisis: OpenAI si está disponible, Ollama como fallback"""
+    """Selector de análisis: OpenAI > Ollama
+
+    Prioridad:
+    1. OpenAI (si OPENAI_API_KEY está configurada)
+    2. Ollama (fallback local gratuito)
+
+    COMENTADO: Google Gemini está disponible en analyze_with_gemini() si necesitas activarlo
+    """
     if OPENAI_API_KEY:
-        logger.debug("📊 Usando OpenAI para análisis")
+        logger.debug("📊 Usando OpenAI para análisis (prioridad 1)")
         return await analyze_with_openai(transcript_text)
     else:
-        logger.debug("📊 Usando Ollama para análisis (OpenAI no configurado)")
+        logger.debug("📊 Usando Ollama para análisis (prioridad 2, fallback)")
         return await analyze_with_ollama(transcript_text)
 
 
@@ -783,11 +859,11 @@ async def websocket_audio_stream(websocket: WebSocket):
                                 logger.info(f"✅ Análisis enviado al frontend")
                             except Exception as e:
                                 logger.error(f"❌ Error en análisis: {e}")
-                                # Enviar análisis vacío para que no se cuelgue
+                                # Enviar análisis por defecto con al menos una pregunta
                                 await websocket.send_json({
                                     "type": "analysis",
                                     "data": {
-                                        "preguntas_sugeridas": [],
+                                        "preguntas_sugeridas": ["¿Cuál es el motivo de su llamada?"],
                                         "datos_paciente": {"nombre": None, "sintomas": [], "medicamentos": [], "alergias": []},
                                         "nivel_riesgo": "bajo",
                                         "alertas": [],

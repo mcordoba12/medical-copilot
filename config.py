@@ -20,5 +20,8 @@ ASSEMBLYAI_API_KEY = os.getenv("ASSEMBLYAI_API_KEY", "")
 # OpenAI
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
+# Google Gemini (descomenta para usar)
+# GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+
 # Logging
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")

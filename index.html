@@ -122,6 +122,47 @@
             transform: translateX(2px);
         }
 
+        /* Estilos para preguntas nuevas vs antiguas */
+        .suggestion-item.question-new {
+            background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
+            border-left: 4px solid #1b5e20;
+            font-weight: 500;
+            opacity: 1;
+        }
+
+        .suggestion-item.question-new::before {
+            content: "✨ ";
+            color: #1b5e20;
+            font-weight: bold;
+        }
+
+        .suggestion-item.question-old {
+            opacity: 0.6;
+            font-size: 12px;
+            background: #fafafa;
+            border-left: 3px solid #9e9e9e;
+        }
+
+        .suggestion-item.question-separator {
+            background: #e0e0e0;
+            padding: 4px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+            text-align: center;
+            cursor: default;
+            border-left: none;
+            border-radius: 4px;
+            margin: 8px 0;
+            opacity: 0.7;
+        }
+
+        .suggestion-item.question-separator:hover {
+            transform: none;
+            box-shadow: none;
+            background: #e0e0e0;
+        }
+
         /* Secciones secundarias */
         .analysis-section {
             background: white;
@@ -270,6 +311,25 @@
             background: rgba(255, 255, 255, 0.3);
             color: #f3f4f6;
             padding: 30px;
+            animation: pulse-loading 1.5s ease-in-out infinite;
+        }
+
+        #updatingStatus {
+            background: rgba(255, 255, 255, 0.25) !important;
+            color: #f3f4f6 !important;
+            padding: 25px !important;
+            font-size: 14px !important;
+            font-weight: 500;
+            animation: pulse-loading 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-loading {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.6;
+            }
         }
 
         .analysis-section.empty {
@@ -670,6 +730,10 @@
         let processor = null;
         let source = null;
 
+        // ========== HISTORIAL DE PREGUNTAS SUGERIDAS ==========
+        let allQuestions = [];  // Acumula preguntas a lo largo de la llamada
+        const MAX_QUESTIONS = 10;  // Máximo de preguntas a mostrar
+
 
         // Elementos del DOM
         const audioFile = document.getElementById('audioFile');
@@ -680,6 +744,9 @@
 
         // ========== INICIALIZAR PANEL DE ANÁLISIS CON PLACEHOLDERS ==========
         function initializeAnalysisPanel() {
+            // Resetear historial de preguntas para nueva llamada
+            allQuestions = [];
+
             const suggestedQuestionsDiv = document.getElementById('suggestedQuestions');
             const patientDataDiv = document.getElementById('patientData');
             const riskLevelDiv = document.getElementById('riskLevel');
@@ -747,6 +814,8 @@
 
                     } else if (data.type === 'analysis') {
                         console.log('🤖 Análisis recibido:', data.data);
+                        cancelAnalysisTimeout(); // Cancelar timeout cuando llega respuesta
+                        analysisInProgress = false; // Liberar flag inmediatamente
                         handleAnalysis(data.data, data.progressive || false);
 
                     } else if (data.type === 'status') {
@@ -968,9 +1037,9 @@
                     accumulatedText += `${speaker}: ${utterance.text}\n`;
                 }
 
-                // Si hemos mostrado 2 utterances nuevos desde el último análisis, analizar
+                // Si hemos mostrado 3 utterances nuevos desde el último análisis, analizar
                 const utterancesSinceLastAnalysis = lastDisplayedIndex - lastAnalyzedIndex;
-                if (utterancesSinceLastAnalysis >= 2 && !analysisInProgress) {
+                if (utterancesSinceLastAnalysis >= 3 && !analysisInProgress) {
                     console.log(`📊 Disparando análisis: ${utterancesSinceLastAnalysis} utterances nuevos`);
                     requestProgressiveAnalysis();
                     lastAnalyzedIndex = lastDisplayedIndex; // Marcar estos como analizados
@@ -981,7 +1050,9 @@
             }
         }
 
-        // ========== ANÁLISIS PROGRESIVO BAJO DEMANDA ==========
+        // ========== ANÁLISIS PROGRESIVO BAJO DEMANDA (NO-BLOQUEANTE) ==========
+        const ANALYSIS_TIMEOUT = 30000; // 30 segundos para OpenAI (5-10s) + Ollama (5-10s) + margen
+
         function requestProgressiveAnalysis() {
             if (!ws || ws.readyState !== WebSocket.OPEN) {
                 console.warn('⚠️ WebSocket no conectado para análisis');
@@ -989,7 +1060,7 @@
             }
 
             if (analysisInProgress) {
-                console.debug('⏳ Análisis ya en progreso');
+                console.debug('⏳ Análisis ya en progreso, ignorando solicitud');
                 return;
             }
 
@@ -1001,23 +1072,56 @@
             analysisInProgress = true;
             const charCount = accumulatedText.length;
             const wordCount = accumulatedText.split(/\s+/).length;
+
             console.log(`📤 Solicitando análisis: ${charCount} caracteres, ~${wordCount} palabras`);
             console.log(`📝 Texto acumulado:\n${accumulatedText}`);
-            showInfo(`⏳ Analizando progresivamente (${wordCount} palabras)...`);
 
-            // Enviar mensaje de análisis al backend
+            // Mostrar estado "Actualizando..." sin bloquear
+            showUpdatingStatus('Analizando con IA...');
+
+            // Enviar mensaje de análisis SIN esperar (no-bloqueante)
             ws.send(JSON.stringify({
                 type: "analyze",
                 text: accumulatedText
             }));
 
-            // Timeout para liberar flag si no hay respuesta
-            setTimeout(() => {
+            // Timeout para liberar flag si no hay respuesta (15 segundos para OpenAI)
+            const analysisTimeoutId = setTimeout(() => {
                 if (analysisInProgress) {
                     analysisInProgress = false;
-                    console.warn('⚠️ Timeout en análisis (5s), permitiendo siguiente');
+                    console.warn(`⚠️ Timeout en análisis (${ANALYSIS_TIMEOUT/1000}s), permitiendo siguiente solicitud`);
+                    showInfo('⚠️ Análisis tardó demasiado, reintentando...');
                 }
-            }, 5000);
+            }, ANALYSIS_TIMEOUT);
+
+            // Guardar timeout ID para poder cancelarlo si llega respuesta
+            window.currentAnalysisTimeoutId = analysisTimeoutId;
+        }
+
+        // ========== MOSTRAR SPINNER EN TÍTULO (SIN VACIAR PREGUNTAS) ==========
+        function showUpdatingStatus(message) {
+            const titleElement = document.querySelector('#suggestedQuestionsContainer strong');
+            if (titleElement && !titleElement.textContent.includes('🔄')) {
+                titleElement.textContent = '⭐ Preguntas Sugeridas 🔄';
+                console.log(`🔄 ${message}`);
+            }
+        }
+
+        // ========== REMOVER SPINNER DEL TÍTULO ==========
+        function removeUpdatingStatus() {
+            const titleElement = document.querySelector('#suggestedQuestionsContainer strong');
+            if (titleElement) {
+                titleElement.textContent = '⭐ Preguntas Sugeridas';
+            }
+        }
+
+        // ========== CANCELAR TIMEOUT Y REMOVER SPINNER CUANDO LLEGA RESPUESTA ==========
+        function cancelAnalysisTimeout() {
+            if (window.currentAnalysisTimeoutId) {
+                clearTimeout(window.currentAnalysisTimeoutId);
+                removeUpdatingStatus();  // Quitar spinner cuando respuesta llega
+                console.debug('✅ Timeout de análisis cancelado (respuesta llegó)');
+            }
         }
 
         // Agregar evento timeupdate para sincronización
@@ -1034,23 +1138,64 @@
             const alertsDiv = document.getElementById('alerts');
             const summaryDiv = document.getElementById('summary');
 
-            // ===== PREGUNTAS SUGERIDAS (Elemento Principal) =====
+            // ===== PREGUNTAS SUGERIDAS - ACUMULADAS (NO se borran) =====
             if (analysis.preguntas_sugeridas && analysis.preguntas_sugeridas.length > 0) {
-                suggestedQuestionsDiv.innerHTML = '';
-                analysis.preguntas_sugeridas.forEach((q, i) => {
-                    const questionBtn = document.createElement('div');
-                    questionBtn.className = 'suggestion-item';
-                    questionBtn.innerHTML = `<strong>#${i + 1}</strong><br>${q}`;
-                    questionBtn.style.cursor = 'pointer';
-                    questionBtn.addEventListener('click', () => {
-                        console.log(`📋 Pregunta seleccionada: ${q}`);
-                        showInfo(`Pregunta agregada: "${q}"`);
-                    });
-                    suggestedQuestionsDiv.appendChild(questionBtn);
+                // Agregar preguntas nuevas al inicio (evitar duplicados)
+                analysis.preguntas_sugeridas.forEach((newQ) => {
+                    const exists = allQuestions.some(q => q.text === newQ);
+                    if (!exists) {
+                        allQuestions.unshift({ text: newQ, timestamp: Date.now() });
+                    }
                 });
-            } else {
-                suggestedQuestionsDiv.innerHTML = '<div class="placeholder-content">⏳ Analizando...</div>';
+
+                // Limitar a máximo MAX_QUESTIONS
+                if (allQuestions.length > MAX_QUESTIONS) {
+                    allQuestions = allQuestions.slice(0, MAX_QUESTIONS);
+                }
+
+                // ===== ACTUALIZACIÓN NO-DESTRUCTIVA =====
+                // Solo reemplaza si hay preguntas nuevas
+                // Nunca limpia el contenedor completamente
+                const hasNewItems = analysis.preguntas_sugeridas && analysis.preguntas_sugeridas.length > 0;
+
+                if (hasNewItems) {
+                    // Crear contenedor temporal con todas las preguntas
+                    const tempDiv = document.createElement('div');
+
+                    let hasNewQuestions = false;
+                    allQuestions.forEach((q, index) => {
+                        const questionBtn = document.createElement('div');
+                        const isNew = index < analysis.preguntas_sugeridas.length;  // Las nuevas son las primeras
+
+                        if (!hasNewQuestions && !isNew && index > 0) {
+                            // Separador entre preguntas nuevas y antiguas
+                            const separator = document.createElement('div');
+                            separator.className = 'suggestion-item question-separator';
+                            separator.innerHTML = '─── Preguntas Anteriores ───';
+                            tempDiv.appendChild(separator);
+                            hasNewQuestions = true;
+                        }
+
+                        questionBtn.className = `suggestion-item ${isNew ? 'question-new' : 'question-old'}`;
+                        questionBtn.innerHTML = `${q.text}`;
+                        questionBtn.style.cursor = 'pointer';
+                        questionBtn.addEventListener('click', () => {
+                            console.log(`📋 Pregunta seleccionada: ${q.text}`);
+                            showInfo(`Pregunta: "${q.text}"`);
+                        });
+                        tempDiv.appendChild(questionBtn);
+                    });
+
+                    // Reemplazar SOLO el contenido (sin tocar el contenedor padre)
+                    suggestedQuestionsDiv.replaceChildren(...tempDiv.childNodes);
+                    console.log(`📝 Historial de preguntas: ${allQuestions.length} preguntas acumuladas`);
+                }
+                // Si NO hay nuevas preguntas, no hacer nada (mantener las existentes)
+            } else if (allQuestions.length === 0) {
+                // Si no hay análisis y es la primera vez, mostrar placeholder
+                suggestedQuestionsDiv.innerHTML = '<div class="placeholder-content">⏳ Esperando análisis...</div>';
             }
+            // Si hay preguntas previas pero no nuevas, mantener las que hay (no hacer nada)
 
             // ===== DATOS DEL PACIENTE =====
             const paciente = analysis.datos_paciente || {};
