@@ -220,6 +220,12 @@
     .alert-pill .l1{font-size:11px;font-weight:800;letter-spacing:.6px;line-height:1.1;}
     .alert-pill .l2{display:flex;align-items:center;justify-content:center;gap:5px;font-size:15px;font-weight:900;letter-spacing:1px;margin-top:2px;}
 
+    /* Alerts Container */
+    #alertsContainer{
+      display:flex;flex-direction:column;gap:11px;
+      flex:0 0 auto;min-height:0;
+    }
+
     /* Alert rows */
     .alert{
       display:flex;gap:11px;align-items:flex-start;
@@ -236,7 +242,14 @@
     .alert .body b{color:var(--ink);}
 
     /* Triage */
-    .triage-list{display:flex;flex-direction:column;gap:2px;padding:4px 8px 10px;}
+    .triage-list{
+      display:flex;flex-direction:column;gap:2px;padding:4px 8px 10px;
+      flex:1;min-height:0;overflow-y:auto;
+    }
+    .triage-list::-webkit-scrollbar{width:6px;}
+    .triage-list::-webkit-scrollbar-track{background:transparent;}
+    .triage-list::-webkit-scrollbar-thumb{background:#d4e3d9;border-radius:3px;}
+    .triage-list::-webkit-scrollbar-thumb:hover{background:#c1d5c5;}
     .triage-item{
       display:flex;align-items:center;gap:10px;cursor:pointer;
       padding:7px 8px;border-radius:8px;transition:background .12s;
@@ -502,6 +515,7 @@
     let elapsedSeconds = 0;
     let sessionId = null;
     let lastSummary = "";
+    let displayedUtteranceIds = new Set();  // Protección contra duplicados
     const MAX_QUESTIONS = 10;
     const ANALYSIS_TIMEOUT = 30000;
     let currentAnalysisTimeoutId = null;
@@ -611,7 +625,6 @@
         displayed: false
       });
 
-      accumulatedText += text + " ";
       console.log(`📝 Utterance #${utterances.length} [${start}s-${end}s]: "${text.substring(0, 50)}..." (role: ${role})`);
     }
 
@@ -622,6 +635,7 @@
 
       // Update questions
       if (analysis.preguntas_sugeridas && analysis.preguntas_sugeridas.length > 0) {
+        console.log(`❓ Actualizando preguntas: ${analysis.preguntas_sugeridas.length} nuevas`);
         analysis.preguntas_sugeridas.forEach(q => {
           if (!allQuestions.some(eq => eq.text === q)) {
             allQuestions.unshift({ text: q });
@@ -631,6 +645,7 @@
           allQuestions = allQuestions.slice(0, MAX_QUESTIONS);
         }
         renderTriage(analysis.preguntas_sugeridas.length);
+        console.log(`✅ Panel de preguntas actualizado - Total: ${allQuestions.length}`);
       }
 
       // Update patient data
@@ -646,7 +661,9 @@
       updateAlertPill(riesgo);
 
       // Render alerts
+      console.log(`🚨 Actualizando alertas: ${(analysis.alertas || []).length} alertas`);
       renderAlerts(analysis.alertas || []);
+      console.log(`✅ Contenedor de alertas actualizado`);
 
       // Store summary for display at end
       if (analysis.resumen) {
@@ -681,7 +698,9 @@
     }
 
     function renderTriage(newCount) {
-      $("triagePanel").style.display = "flex";
+      console.log(`📋 renderTriage() - Renderizando ${allQuestions.length} preguntas`);
+      const panel = $("triagePanel");
+      panel.style.display = "flex";
       $("triageCount").textContent = allQuestions.filter(q => q.checked).length;
 
       const list = $("triageList");
@@ -700,6 +719,8 @@
           renderTriage(0);
         });
       });
+
+      console.log(`✅ triagePanel visibilidad: ${panel.style.display}, z-index: ${getComputedStyle(panel).zIndex}`);
     }
 
     function renderAlerts(alertas) {
@@ -833,12 +854,28 @@
       const now = audioElement.currentTime;
       let newUtterances = false;
 
-      utterances.forEach(u => {
-        if (!u.displayed && now >= u.start && now <= u.end) {
-          console.log(`✅ Mostrando: "${u.text}" (${u.start}s - ${u.end}s)`);
-          addBubble(u.who, u.role, u.text);
+      utterances.forEach((u, idx) => {
+        // Crear ID único para cada utterance
+        const uttId = `${u.start}-${u.end}-${u.text.substring(0, 10)}`;
+
+        // Verificación doble: u.displayed Y displayedUtteranceIds
+        if (!u.displayed && !displayedUtteranceIds.has(uttId) && now >= u.start && now <= u.end) {
+          console.log(`✅ Mostrando [${idx}]: "${u.text}" (${u.start}s - ${u.end}s)`);
+
+          // Marcar como mostrado EN AMBOS LUGARES
           u.displayed = true;
+          displayedUtteranceIds.add(uttId);
+
+          // Agregar a accumulatedText SOLO cuando se muestra en pantalla (análisis progresivo)
+          accumulatedText += u.text + " ";
+          console.log(`📊 Texto acumulado para análisis: ${accumulatedText.length} caracteres`);
+
+          addBubble(u.who, u.role, u.text);
           newUtterances = true;
+        } else if (displayedUtteranceIds.has(uttId) && !u.displayed) {
+          // Si ya está en el Set pero u.displayed es falso, sincronizar
+          console.warn(`⚠️ Utterance [${idx}] ya mostrado pero u.displayed=false - sincronizando...`);
+          u.displayed = true;
         }
       });
 
@@ -889,6 +926,7 @@
       lastAnalyzedIndex = 0;
       analysisInProgress = false;
       elapsedSeconds = 0;
+      displayedUtteranceIds.clear();  // Limpiar el Set de utterances mostrados
 
       $("transcriptScroll").innerHTML = "";
       $("triagePanel").style.display = "none";

@@ -17,6 +17,7 @@ from pydub import AudioSegment
 from pydub.utils import mediainfo
 import ollama
 from openai import AsyncOpenAI
+import anthropic
 # import google.generativeai as genai  # Descomenta para usar Google Gemini
 from config import (
     HOST, PORT, LOG_LEVEL,
@@ -24,6 +25,7 @@ from config import (
     DEEPGRAM_LANGUAGE, DEEPGRAM_MODEL, DEEPGRAM_PUNCTUATE,
     ASSEMBLYAI_API_KEY,
     OPENAI_API_KEY,
+    ANTHROPIC_API_KEY,
     # GEMINI_API_KEY,  # Descomenta para usar Google Gemini
 )
 
@@ -150,6 +152,73 @@ JSON requerido:
         return await analyze_with_ollama(transcript_text)
 
 
+# ========== ANÁLISIS CON ANTHROPIC CLAUDE ==========
+async def analyze_with_claude(transcript_text: str) -> dict:
+    """Analizar transcripción con Claude (Anthropic)
+
+    Extrae:
+    - Preguntas sugeridas para seguimiento
+    - Datos del paciente
+    - Nivel de riesgo
+    - Alertas importantes
+    - Resumen de la llamada
+    """
+    try:
+        logger.info("🤖 Iniciando análisis con Claude (Anthropic)...")
+
+        client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: client.messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=1024,
+                system="Eres un asistente especializado en admisión médica telefónica. Responde SOLO con JSON válido, sin texto adicional ni markdown.",
+                messages=[{
+                    "role": "user",
+                    "content": f"""Analiza esta transcripción de llamada médica:
+
+TRANSCRIPCIÓN:
+{transcript_text}
+
+Responde SOLO con este JSON:
+{{
+  "preguntas_sugeridas": ["pregunta1", "pregunta2", "pregunta3"],
+  "datos_paciente": {{
+    "nombre": null,
+    "sintomas": [],
+    "medicamentos": [],
+    "alergias": []
+  }},
+  "nivel_riesgo": "bajo|medio|alto|crítico",
+  "alertas": [],
+  "resumen": "resumen breve de la llamada"
+}}"""
+                }]
+            )
+        )
+
+        text = response.content[0].text
+        # Limpiar markdown si existe
+        text = re.sub(r'```json\n?', '', text)
+        text = re.sub(r'```\n?', '', text)
+        text = text.strip()
+
+        logger.debug(f"Respuesta Claude: {text[:200]}...")
+
+        # Extraer JSON
+        analysis = extract_json(text)
+        logger.info(f"✅ Análisis Claude completado - Riesgo: {analysis.get('nivel_riesgo', 'desconocido')}")
+
+        return analysis
+
+    except Exception as e:
+        logger.error(f"❌ Error en análisis Claude: {e}")
+        logger.info("⚠️ Fallback a Ollama...")
+        return await analyze_with_ollama(transcript_text)
+
+
 # ========== ANÁLISIS CON GOOGLE GEMINI (COMENTADO - DESCOMENTA PARA USAR) ==========
 # async def analyze_with_gemini(transcript_text: str) -> dict:
 #     """Analizar transcripción con Google Gemini API
@@ -219,19 +288,25 @@ JSON requerido:
 
 # ========== FUNCIÓN PRINCIPAL DE ANÁLISIS ==========
 async def analyze(transcript_text: str) -> dict:
-    """Selector de análisis: OpenAI > Ollama
+    """Selector de análisis: Claude > Gemini > OpenAI > Ollama
 
     Prioridad:
-    1. OpenAI (si OPENAI_API_KEY está configurada)
-    2. Ollama (fallback local gratuito)
-
-    COMENTADO: Google Gemini está disponible en analyze_with_gemini() si necesitas activarlo
+    1. Claude/Anthropic (si ANTHROPIC_API_KEY está configurada)
+    2. Google Gemini (si GEMINI_API_KEY está configurada)
+    3. OpenAI (si OPENAI_API_KEY está configurada)
+    4. Ollama (fallback local gratuito)
     """
-    if OPENAI_API_KEY:
-        logger.debug("📊 Usando OpenAI para análisis (prioridad 1)")
+    if ANTHROPIC_API_KEY:
+        logger.debug("📊 Usando Claude (Anthropic) para análisis (prioridad 1)")
+        return await analyze_with_claude(transcript_text)
+    # elif GEMINI_API_KEY:
+    #     logger.debug("📊 Usando Gemini para análisis (prioridad 2)")
+    #     return await analyze_with_gemini(transcript_text)
+    elif OPENAI_API_KEY:
+        logger.debug("📊 Usando OpenAI para análisis (prioridad 3)")
         return await analyze_with_openai(transcript_text)
     else:
-        logger.debug("📊 Usando Ollama para análisis (prioridad 2, fallback)")
+        logger.debug("📊 Usando Ollama para análisis (prioridad 4, fallback)")
         return await analyze_with_ollama(transcript_text)
 
 
@@ -958,7 +1033,14 @@ async def startup():
         logger.error("❌ ASSEMBLYAI_API_KEY no configurada")
         logger.error("❌ Transcripción no disponible sin AssemblyAI")
 
-    logger.info("🤖 Ollama: ✅ Integrado (análisis con llama3.2)")
+    # Análisis IA - Mostrar prioridad disponible
+    if ANTHROPIC_API_KEY:
+        logger.info("🤖 Análisis IA: ✅ Claude (Anthropic) - PRIORIDAD 1")
+    # elif GEMINI_API_KEY:
+    #     logger.info("🤖 Análisis IA: ✅ Gemini (Google) - PRIORIDAD 2")
+    if OPENAI_API_KEY:
+        logger.info("🤖 Análisis IA: ✅ OpenAI (GPT-3.5) - PRIORIDAD 2")
+    logger.info("🤖 Análisis IA: ✅ Ollama (llama3.2) - FALLBACK LOCAL")
     logger.info("📝 Análisis automático: ✅ Preguntas, riesgo, alertas")
 
     # DEEPGRAM - DESACTIVADO TEMPORALMENTE
