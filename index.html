@@ -47,7 +47,7 @@
       color:var(--ink);
       overflow:hidden;
       -webkit-font-smoothing:antialiased;
-      font-size:15px;
+      font-size:12px;
     }
 
     .app{
@@ -59,36 +59,36 @@
 
     /* ===== Header ===== */
     .header{
-      height:60px;
-      flex:0 0 60px;
+      height:48px;
+      flex:0 0 48px;
       background:linear-gradient(180deg,#1f6a31,#1a5c2a);
       display:flex;
       align-items:center;
-      padding:0 18px;
+      padding:0 12px;
       color:#fff;
       border-bottom:2px solid var(--green-900);
       position:relative;
     }
-    .brand{display:flex;align-items:center;gap:11px;width:230px;}
+    .brand{display:flex;align-items:center;gap:8px;width:auto;}
     .logo-slot{
-      width:42px;height:42px;border-radius:9px;
-      border:1.5px dashed rgba(255,255,255,.5);
+      width:32px;height:32px;border-radius:6px;
+      border:1px dashed rgba(255,255,255,.5);
       display:flex;align-items:center;justify-content:center;
       color:rgba(255,255,255,.7);
-      font-size:8px;font-weight:700;letter-spacing:.5px;text-align:center;line-height:1.1;
+      font-size:6px;font-weight:700;letter-spacing:.3px;text-align:center;line-height:1;
       background:rgba(255,255,255,.06);
       text-transform:uppercase;
     }
-    .brand-meta{display:flex;flex-direction:column;line-height:1.15;}
-    .brand-meta .org{font-weight:800;font-size:13px;letter-spacing:.2px;}
-    .brand-meta .unit{font-size:10.5px;color:rgba(255,255,255,.7);font-weight:500;}
+    .brand-meta{display:flex;flex-direction:column;line-height:1.05;}
+    .brand-meta .org{font-weight:700;font-size:10px;letter-spacing:.1px;}
+    .brand-meta .unit{font-size:8px;color:rgba(255,255,255,.7);font-weight:500;}
 
     .header-title{
       position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
       text-align:center;
     }
-    .header-title .t{font-size:17px;font-weight:800;letter-spacing:.2px;white-space:nowrap;}
-    .header-title .s{font-size:10.5px;color:rgba(255,255,255,.72);font-weight:600;letter-spacing:.6px;text-transform:uppercase;white-space:nowrap;}
+    .header-title .t{font-size:13px;font-weight:800;letter-spacing:.1px;white-space:nowrap;}
+    .header-title .s{font-size:8px;color:rgba(255,255,255,.72);font-weight:600;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap;}
 
     .header-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
     .live-badge{
@@ -111,44 +111,44 @@
     .main{
       flex:1 1 auto;min-height:0;
       display:grid;
-      grid-template-columns:40fr 60fr;
-      gap:14px;
-      padding:14px;
+      grid-template-columns:25fr 75fr;
+      gap:10px;
+      padding:10px;
     }
-    .col{display:flex;flex-direction:column;gap:14px;min-height:0;}
+    .col{display:flex;flex-direction:column;gap:10px;min-height:0;}
 
     .panel{
       background:var(--panel);
       border:1px solid var(--line);
-      border-radius:var(--radius);
+      border-radius:8px;
       box-shadow:var(--shadow);
       display:flex;flex-direction:column;min-height:0;
     }
     .panel-head{
-      display:flex;align-items:center;gap:9px;
-      padding:12px 16px 9px;
+      display:flex;align-items:center;gap:6px;
+      padding:8px 12px 6px;
     }
-    .panel-head h2{margin:0;font-size:15.5px;font-weight:800;color:var(--green-800);letter-spacing:.1px;white-space:nowrap;}
-    .panel-head .sub{font-size:11px;color:var(--ink-faint);font-weight:600;margin-left:auto;}
+    .panel-head h2{margin:0;font-size:12px;font-weight:800;color:var(--green-800);letter-spacing:.05px;white-space:nowrap;}
+    .panel-head .sub{font-size:9px;color:var(--ink-faint);font-weight:600;margin-left:auto;}
 
     /* ===== Transcription ===== */
     .transcript-panel{flex:1 1 auto;}
     .transcript-head{border-bottom:1px solid var(--line-soft);}
-    .rec-dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:livePulse 1.6s infinite;}
+    .rec-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:livePulse 1.6s infinite;}
     .transcript-scroll{
-      flex:1 1 auto;overflow-y:auto;padding:12px 14px;
-      display:flex;flex-direction:column;gap:9px;
+      flex:1 1 auto;overflow-y:auto;padding:8px 10px;
+      display:flex;flex-direction:column;gap:6px;
       scroll-behavior:smooth;
     }
-    .transcript-scroll::-webkit-scrollbar{width:8px;}
-    .transcript-scroll::-webkit-scrollbar-thumb{background:#cdd8d1;border-radius:8px;}
+    .transcript-scroll::-webkit-scrollbar{width:6px;}
+    .transcript-scroll::-webkit-scrollbar-thumb{background:#cdd8d1;border-radius:6px;}
 
     .bubble{
-      border-radius:11px;padding:8px 12px 9px;max-width:92%;
-      font-size:13.5px;line-height:1.42;
+      border-radius:8px;padding:6px 10px;max-width:92%;
+      font-size:11px;line-height:1.35;
       opacity:1;
     }
-    .bubble .who{font-weight:800;font-size:11.5px;letter-spacing:.3px;display:block;margin-bottom:1px;}
+    .bubble .who{font-weight:700;font-size:9.5px;letter-spacing:.2px;display:block;margin-bottom:.5px;}
     .bubble.agente{background:#eef7f0;border:1px solid #d8ecdd;align-self:flex-start;}
     .bubble.agente .who{color:var(--green-700);}
     .bubble.paciente{background:#f4f6f5;border:1px solid #e6ebe8;align-self:flex-end;}
@@ -163,17 +163,17 @@
     @keyframes typing{0%,60%,100%{opacity:.3;transform:translateY(0);}30%{opacity:1;transform:translateY(-3px);}}
 
     /* ===== Progress ===== */
-    .progress-panel{flex:0 0 auto;padding:13px 16px 14px;}
-    .progress-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;}
-    .progress-top .lab{font-size:12px;font-weight:700;color:var(--ink-soft);}
-    .progress-top .pct{font-size:13px;font-weight:800;color:var(--green-700);font-variant-numeric:tabular-nums;}
-    .bar{height:9px;border-radius:6px;background:#e6ece8;overflow:hidden;}
-    .bar > span{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#3aa356,#1f7a37);transition:width .6s cubic-bezier(.4,0,.2,1);}
-    .progress-foot{display:flex;align-items:center;gap:14px;margin-top:12px;flex-wrap:wrap;}
-    .checkpoints{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;flex:1;}
-    .cp{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink-faint);white-space:nowrap;}
+    .progress-panel{flex:0 0 auto;padding:10px 12px;}
+    .progress-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;}
+    .progress-top .lab{font-size:10px;font-weight:700;color:var(--ink-soft);}
+    .progress-top .pct{font-size:11px;font-weight:800;color:var(--green-700);font-variant-numeric:tabular-nums;}
+    .bar{height:6px;border-radius:4px;background:#e6ece8;overflow:hidden;}
+    .bar > span{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#3aa356,#1f7a37);transition:width .6s cubic-bezier(.4,0,.2,1);}
+    .progress-foot{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;}
+    .checkpoints{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;flex:1;}
+    .cp{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:var(--ink-faint);white-space:nowrap;}
     .cp.done{color:var(--green-700);}
-    .cp .ic{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:0 0 16px;border:1.5px solid currentColor;}
+    .cp .ic{width:13px;height:13px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:0 0 13px;border:1.2px solid currentColor;}
     .cp.done .ic{background:var(--green-600);border-color:var(--green-600);color:#fff;}
     .cp.active .ic{border-color:var(--amber);color:var(--amber);}
     .cp.active{color:var(--amber);}
@@ -181,9 +181,9 @@
     .btn-analyze{
       border:none;cursor:pointer;
       background:linear-gradient(180deg,#2e8b43,#1a5c2a);
-      color:#fff;font-family:var(--font);font-weight:800;font-size:14px;letter-spacing:.5px;
-      padding:11px 18px;border-radius:9px;
-      display:inline-flex;align-items:center;gap:9px;
+      color:#fff;font-family:var(--font);font-weight:700;font-size:11px;letter-spacing:.3px;
+      padding:7px 12px;border-radius:6px;
+      display:inline-flex;align-items:center;gap:6px;
       box-shadow:0 2px 5px rgba(26,92,42,.32);
       transition:transform .12s, box-shadow .12s, filter .12s;
       white-space:nowrap;
@@ -191,7 +191,7 @@
     .btn-analyze:hover{filter:brightness(1.06);box-shadow:0 4px 11px rgba(26,92,42,.4);}
     .btn-analyze:active{transform:translateY(1px);}
     .btn-analyze.loading{opacity:.85;cursor:progress;}
-    .spinner{width:15px;height:15px;border:2.4px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+    .spinner{width:12px;height:12px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg);}}
 
     /* ===== Right column ===== */
@@ -199,26 +199,77 @@
 
     /* Patient card */
     .patient-card{
-      background:#fff;border:1px solid var(--line);border-radius:var(--radius);
-      box-shadow:var(--shadow);padding:13px 16px;
-      display:flex;align-items:flex-start;gap:14px;
+      background:#fff;border:1px solid var(--line);border-radius:8px;
+      box-shadow:var(--shadow);padding:10px 12px;
+      display:flex;align-items:flex-start;gap:10px;
       flex:0 0 auto;
     }
     .patient-main{flex:1;min-width:0;}
-    .patient-name{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:.2px;line-height:1.1;}
-    .patient-id{font-size:12.5px;color:var(--ink-soft);font-weight:600;margin-top:3px;}
+    .patient-name{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:.1px;line-height:1.1;}
+    .patient-id{font-size:10px;color:var(--ink-soft);font-weight:600;margin-top:2px;}
     .patient-id b{color:var(--ink);font-weight:700;}
-    .patient-loc{font-size:12.5px;color:var(--ink-soft);margin-top:7px;display:flex;align-items:center;gap:6px;}
+    .patient-loc{font-size:10px;color:var(--ink-soft);margin-top:5px;display:flex;align-items:center;gap:4px;}
     .patient-loc .miss{color:var(--amber);font-weight:700;}
     .alert-pill{
       flex:0 0 auto;background:linear-gradient(180deg,#d8423b,#b3261e);
-      color:#fff;border-radius:9px;padding:8px 12px;text-align:center;
+      color:#fff;border-radius:6px;padding:6px 8px;text-align:center;
       box-shadow:0 2px 6px rgba(179,38,30,.35);
       animation:critBlink 1.25s ease-in-out infinite;
     }
     @keyframes critBlink{0%,100%{box-shadow:0 0 0 0 rgba(210,59,52,.0),0 2px 6px rgba(179,38,30,.35);}50%{box-shadow:0 0 0 4px rgba(210,59,52,.28),0 2px 6px rgba(179,38,30,.45);}}
-    .alert-pill .l1{font-size:11px;font-weight:800;letter-spacing:.6px;line-height:1.1;}
-    .alert-pill .l2{display:flex;align-items:center;justify-content:center;gap:5px;font-size:15px;font-weight:900;letter-spacing:1px;margin-top:2px;}
+    .alert-pill .l1{font-size:8px;font-weight:800;letter-spacing:.4px;line-height:1;}
+    .alert-pill .l2{display:flex;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:900;letter-spacing:.5px;margin-top:1px;}
+
+    /* ===== Triage Card ===== */
+    .triage-card {
+      background:#fff;border:1px solid var(--line);border-radius:8px;
+      padding:10px;margin-top:8px;box-shadow:var(--shadow-sm);
+    }
+    .triage-label {
+      font-size:10px;font-weight:800;color:var(--green-800);
+      text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;
+    }
+    .triage-badges {
+      display:grid;grid-template-columns:1fr 1fr;gap:5px;
+    }
+    .tbadge {
+      font-size:9px;font-weight:600;padding:5px 7px;
+      border-radius:6px;border:1.5px solid #e0e0e0;
+      transition:all 0.3s;text-align:center;
+      background:#f5f5f5;color:#666;cursor:pointer;
+    }
+    .tbadge small {
+      font-size:7px;display:block;margin-top:2px;
+    }
+    .tbadge.emergencia { background:#f5f5f5;color:#666;border-color:#e0e0e0; }
+    .tbadge.urgencia { background:#f5f5f5;color:#666;border-color:#e0e0e0; }
+    .tbadge.prioritaria { background:#f5f5f5;color:#666;border-color:#e0e0e0; }
+    .tbadge.consulta { background:#f5f5f5;color:#666;border-color:#e0e0e0; }
+    .tbadge.active.emergencia { background:#ffcdd2;color:#b71c1c;border-color:#b71c1c;font-weight:800; }
+    .tbadge.active.urgencia { background:#ffe0b2;color:#e65100;border-color:#e65100;font-weight:800; }
+    .tbadge.active.prioritaria { background:#fff9c4;color:#f57f17;border-color:#f57f17;font-weight:800; }
+    .tbadge.active.consulta { background:#c8e6c9;color:#1b5e20;border-color:#1b5e20;font-weight:800; }
+
+    /* ===== Alerts Side Panel ===== */
+    .alerts-side {flex:0 1 280px;min-width:0;}
+    .alerts-side-title {
+      font-size:10px;font-weight:800;color:var(--green-800);
+      margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;
+    }
+    .alerts-side-list {
+      max-height:120px;overflow-y:auto;
+      display:flex;flex-direction:column;gap:4px;
+    }
+    .alert-side-item {
+      font-size:9px;padding:4px 6px;
+      border-radius:5px;border:1px solid;line-height:1.3;
+    }
+    .alert-side-item.critical {
+      background:var(--red-bg);border-color:var(--red-line);color:var(--red-deep);
+    }
+    .alert-side-item.warning {
+      background:var(--amber-bg);border-color:var(--amber-line);color:#a6720a;
+    }
 
     /* Alerts Container */
     #alertsContainer{
@@ -228,72 +279,92 @@
 
     /* Alert rows */
     .alert{
-      display:flex;gap:11px;align-items:flex-start;
-      border-radius:11px;padding:11px 13px;border:1px solid;
-      box-shadow:var(--shadow-sm);font-size:13px;line-height:1.4;
+      display:flex;gap:8px;align-items:flex-start;
+      border-radius:8px;padding:8px 10px;border:1px solid;
+      box-shadow:var(--shadow-sm);font-size:10px;line-height:1.35;
       flex:0 0 auto;
     }
-    .alert .ic-wrap{flex:0 0 auto;margin-top:1px;}
+    .alert .ic-wrap{flex:0 0 auto;margin-top:.5px;}
     .alert.critical{background:var(--red-bg);border-color:var(--red-line);}
-    .alert.critical .tag{color:var(--red-deep);font-weight:900;letter-spacing:.3px;}
+    .alert.critical .tag{color:var(--red-deep);font-weight:800;letter-spacing:.2px;}
     .alert.warning{background:var(--amber-bg);border-color:var(--amber-line);}
-    .alert.warning .tag{color:#a6720a;font-weight:900;letter-spacing:.3px;}
+    .alert.warning .tag{color:#a6720a;font-weight:800;letter-spacing:.2px;}
     .alert .body{color:var(--ink-soft);}
     .alert .body b{color:var(--ink);}
 
     /* Triage */
     .triage-list{
-      display:flex;flex-direction:column;gap:2px;padding:4px 8px 10px;
-      flex:1;min-height:0;overflow-y:auto;
+      display:flex;flex-direction:column;gap:1px;padding:3px 6px 8px;
+      max-height:120px;overflow-y:auto;min-height:auto;
     }
-    .triage-list::-webkit-scrollbar{width:6px;}
+    .triage-list::-webkit-scrollbar{width:4px;}
     .triage-list::-webkit-scrollbar-track{background:transparent;}
-    .triage-list::-webkit-scrollbar-thumb{background:#d4e3d9;border-radius:3px;}
+    .triage-list::-webkit-scrollbar-thumb{background:#d4e3d9;border-radius:2px;}
     .triage-list::-webkit-scrollbar-thumb:hover{background:#c1d5c5;}
     .triage-item{
-      display:flex;align-items:center;gap:10px;cursor:pointer;
-      padding:7px 8px;border-radius:8px;transition:background .12s;
-      font-size:13.5px;color:var(--ink);user-select:none;
+      display:flex;align-items:center;gap:7px;cursor:pointer;
+      padding:5px 6px;border-radius:6px;transition:background .12s;
+      font-size:10px;color:var(--ink);user-select:none;
     }
     .triage-item:hover{background:#f3f7f4;}
     .triage-item .box{
-      width:18px;height:18px;border-radius:5px;border:1.8px solid #b9c6bd;flex:0 0 18px;
+      width:14px;height:14px;border-radius:3px;border:1.2px solid #b9c6bd;flex:0 0 14px;
       display:flex;align-items:center;justify-content:center;transition:all .14s;background:#fff;
     }
     .triage-item.checked .box{background:var(--green-600);border-color:var(--green-600);}
     .triage-item.checked .txt{color:var(--ink-faint);text-decoration:line-through;}
-    .triage-item .ask{margin-left:auto;font-size:10.5px;font-weight:800;color:var(--green-700);opacity:0;background:#e8f4ec;padding:3px 8px;border-radius:6px;transition:opacity .12s;}
+    .triage-item .ask{margin-left:auto;font-size:8px;font-weight:700;color:var(--green-700);opacity:0;background:#e8f4ec;padding:2px 6px;border-radius:4px;transition:opacity .12s;}
     .triage-item:hover .ask{opacity:1;}
 
-    /* Report grid */
-    .report-panel{flex:0 0 auto;}
-    .report-sub{font-size:11.5px;color:var(--ink-faint);font-weight:600;padding:0 16px 2px;margin-top:-2px;}
-    .report-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:10px 16px 12px;}
-    .report-cell{display:flex;gap:11px;align-items:flex-start;}
-    .report-ic{
-      width:34px;height:34px;border-radius:9px;flex:0 0 34px;
-      display:flex;align-items:center;justify-content:center;
-      color:currentColor;
+    /* Triage Panel */
+    #triagePanel {flex:0 0 auto;}
+
+    /* Secciones grid - 3 columnas + 1 fila completa */
+    .secciones-grid{
+      display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;
     }
-    .report-ic.blue{background:var(--blue-bg);color:var(--blue);}
-    .report-ic.teal{background:#e3f4f1;color:#0e8b7d;}
-    .report-ic.red{background:var(--red-bg);color:var(--red);}
-    .report-ic.green{background:#e8f4ec;color:var(--green-700);}
-    .report-cell .rlab{font-size:11px;font-weight:800;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.4px;}
-    .report-cell .rval{font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.25;margin-top:1px;}
-    .report-foot{padding:0 16px 12px;font-size:11px;color:var(--ink-faint);font-style:italic;border-top:1px solid var(--line-soft);padding-top:9px;}
+    .seccion-card{
+      background:#fff;border:1px solid #e2e8e3;border-radius:12px;padding:10px 12px;
+    }
+    .seccion-title{
+      font-size:11px;font-weight:800;color:#1a5c2a;
+      display:flex;align-items:center;gap:5px;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #eef2ef;
+    }
+    .campo{
+      display:flex;justify-content:space-between;font-size:11.5px;padding:3px 0;border-bottom:1px solid #f4f7f5;
+    }
+    .campo:last-child{border-bottom:none;}
+    .campo-label{color:#7c8a82;font-weight:600;}
+    .campo-value{color:#1b2620;font-weight:700;text-align:right;max-width:50%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+    .cita-row{
+      display:flex;align-items:center;gap:8px;font-size:10px;padding:6px 0;border-bottom:1px solid #f4f7f5;min-height:24px;
+    }
+    .cita-row:last-child{border-bottom:none;}
+    .cita-badge{
+      font-size:9px;font-weight:800;padding:2px 8px;border-radius:6px;white-space:nowrap;flex:0 0 auto;display:inline-block;
+    }
+    .cita-badge.terminada{background:#e8f5e9;color:#2e7d32;}
+    .cita-badge.cancelada{background:#fbe9e7;color:#bf360c;}
+    .cita-badge.agendada{background:#e3f2fd;color:#1565c0;}
+    .cita-badge.atendida{background:#e8f5e9;color:#2e7d32;}
+    .cita-badge.reagendada{background:#f3e5f5;color:#6a1b9a;}
+    .cita-tipo{color:#43524a;flex:1;min-width:0;}
+    .cita-fecha{color:#7c8a82;font-size:9px;white-space:nowrap;flex:0 0 auto;}
+    .cita-tipo{color:#43524a;flex:1;}
+    .cita-fecha{color:#7c8a82;white-space:nowrap;}
 
     /* ===== Status bar ===== */
     .statusbar{
-      height:30px;flex:0 0 30px;
+      height:24px;flex:0 0 24px;
       background:var(--green-900);color:rgba(255,255,255,.92);
       display:flex;align-items:center;gap:0;
-      padding:0 16px;font-size:11.5px;font-weight:600;letter-spacing:.2px;
+      padding:0 12px;font-size:9px;font-weight:600;letter-spacing:.1px;
     }
-    .statusbar .seg{display:flex;align-items:center;gap:7px;}
-    .statusbar .sep{width:1px;height:13px;background:rgba(255,255,255,.22);margin:0 13px;}
+    .statusbar .seg{display:flex;align-items:center;gap:5px;}
+    .statusbar .sep{width:1px;height:10px;background:rgba(255,255,255,.22);margin:0 10px;}
     .statusbar .ok{color:#7fe39a;}
-    .statusbar .right{margin-left:auto;display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.7);}
+    .statusbar .right{margin-left:auto;display:flex;align-items:center;gap:5px;color:rgba(255,255,255,.7);}
 
     /* File input hidden */
     input[type="file"]{display:none;}
@@ -306,18 +377,18 @@
     #audioPlayerContainer {
       display: none;
       width: 100%;
-      margin-top: 12px;
-      padding: 12px;
+      margin-top: 8px;
+      padding: 8px;
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: var(--radius);
+      border-radius: 6px;
       box-shadow: var(--shadow-sm);
     }
 
     #audioPlayer {
       width: 100%;
-      height: 44px;
-      border-radius: 6px;
+      height: 32px;
+      border-radius: 4px;
       accent-color: var(--green-600);
     }
 
@@ -334,6 +405,51 @@
 
     #audioPlayer::-webkit-media-controls-volume-slider {
       accent-color: var(--green-600);
+    }
+
+    /* Historial Panel */
+    .historial-panel {
+      flex: 0 0 auto;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .historial-panel::-webkit-scrollbar {
+      width: 4px;
+    }
+    .historial-panel::-webkit-scrollbar-thumb {
+      background: #cdd8d1;
+      border-radius: 2px;
+    }
+    .hist-label {
+      font-size: 9px;
+      font-weight: 800;
+      color: var(--ink-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      padding: 6px 12px 3px;
+      margin-top: 6px;
+    }
+    .hist-label:first-child {
+      margin-top: 0;
+    }
+    .plan-badge {
+      display: inline-block;
+      background: var(--green-600);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin: 1px 3px;
+    }
+    .planes-container {
+      padding: 2px 12px 6px;
+    }
+    .no-data {
+      padding: 6px 12px;
+      color: var(--ink-faint);
+      font-size: 9px;
+      font-style: italic;
     }
   </style>
 </head>
@@ -408,7 +524,8 @@
       <!-- RIGHT COLUMN: Analysis panels -->
       <div class="col right-scroll">
         <!-- Patient Card -->
-        <div class="patient-card" id="patientCard" style="display:none;">
+        <div class="patient-card" id="patientCard">
+          <!-- COLUMNA IZQUIERDA: datos + clasificación triage -->
           <div class="patient-main">
             <div class="patient-name" id="patientName">-</div>
             <div class="patient-id" id="patientId">-</div>
@@ -418,39 +535,78 @@
               </svg>
               <span id="locText"></span>
             </div>
-          </div>
-          <div class="alert-pill" id="alertPill" style="display:none;">
-            <div class="l1">ALERTA</div>
-            <div class="l2">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/>
-              </svg>
-              <span id="alertLevel">-</span>
+            <!-- Clasificación triage -->
+            <div class="triage-card">
+              <div class="triage-label">CLASIFICACIÓN DE TRIAGE</div>
+              <div class="triage-badges">
+                <span class="tbadge emergencia" id="triage-emergencia">● Emergencia <small>Nivel 1</small></span>
+                <span class="tbadge urgencia" id="triage-urgencia">● Urgencia <small>Nivel 2</small></span>
+                <span class="tbadge prioritaria" id="triage-prioritaria">● Consulta prioritaria <small>Nivel 3</small></span>
+                <span class="tbadge consulta" id="triage-consulta">● Consulta <small>Nivel 4</small></span>
+              </div>
             </div>
+          </div>
+
+          <!-- COLUMNA DERECHA: alertas pequeñas con scroll -->
+          <div class="alerts-side">
+            <div class="alerts-side-title">⚠️ Alertas</div>
+            <div class="alerts-side-list" id="alertsContainer"></div>
           </div>
         </div>
 
-        <!-- Alerts Container -->
-        <div id="alertsContainer"></div>
+        <!-- Historial del Paciente Panel - DEPRECATED -->
+        <!-- Usar la versión visible en seccion-card abajo en su lugar -->
 
         <!-- Triage Panel -->
         <section class="panel" id="triagePanel" style="display:none;">
           <div class="panel-head">
             <h2>Preguntas sugeridas para triage</h2>
-            <span class="sub"><span id="triageCount">0</span>/0</span>
+            <span class="sub"><span id="triageCount">0/0</span></span>
           </div>
           <div class="triage-list" id="triageList"></div>
         </section>
 
-        <!-- Report Panel -->
-        <section class="panel report-panel" id="reportPanel" style="display:none;">
-          <div class="panel-head">
-            <h2>Reporte del Paciente</h2>
+        <!-- Report Panel - 4 Cajitas (3+1 layout) -->
+        <div class="secciones-grid">
+          <!-- CAJITA 1: DATOS PERSONALES -->
+          <div class="seccion-card">
+            <div class="seccion-title">👤 Datos Personales</div>
+            <div class="campo"><span class="campo-label">Sexo</span><span class="campo-value" id="dc-sexo">—</span></div>
+            <div class="campo"><span class="campo-label">Tipo ID</span><span class="campo-value" id="dc-tipo-id">—</span></div>
+            <div class="campo"><span class="campo-label">Número ID</span><span class="campo-value" id="dc-numero-id">—</span></div>
+            <div class="campo"><span class="campo-label">Nacionalidad</span><span class="campo-value" id="dc-nacionalidad">—</span></div>
+            <div class="campo"><span class="campo-label">Teléfono</span><span class="campo-value" id="dc-telefono">—</span></div>
+            <div class="campo"><span class="campo-label">Email</span><span class="campo-value" id="dc-email">—</span></div>
           </div>
-          <div class="report-sub">Datos recuperados de la historia clínica</div>
-          <div class="report-grid" id="reportGrid"></div>
-          <div class="report-foot">La IA apoya la decisión clínica; el juicio profesional del agente prevalece en todo momento.</div>
-        </section>
+
+          <!-- CAJITA 2: UBICACIÓN -->
+          <div class="seccion-card">
+            <div class="seccion-title">📍 Ubicación</div>
+            <div class="campo"><span class="campo-label">País</span><span class="campo-value" id="dc-pais">—</span></div>
+            <div class="campo"><span class="campo-label">Departamento</span><span class="campo-value" id="dc-depto">—</span></div>
+            <div class="campo"><span class="campo-label">Ciudad</span><span class="campo-value" id="dc-ciudad">—</span></div>
+            <div class="campo"><span class="campo-label">Zona</span><span class="campo-value" id="dc-zona">—</span></div>
+            <div class="campo"><span class="campo-label">Dirección</span><span class="campo-value" id="dc-direccion">—</span></div>
+          </div>
+
+          <!-- CAJITA 3: SALUD -->
+          <div class="seccion-card">
+            <div class="seccion-title">🏥 Salud</div>
+            <div class="campo"><span class="campo-label">EPS</span><span class="campo-value" id="dc-eps">—</span></div>
+            <div class="campo"><span class="campo-label">Plan</span><span class="campo-value" id="dc-plan">—</span></div>
+            <div class="campo"><span class="campo-label">Vinculación</span><span class="campo-value" id="dc-vinculacion">—</span></div>
+            <div class="campo"><span class="campo-label">Última cita</span><span class="campo-value" id="dc-ultima-cita">—</span></div>
+            <div class="campo"><span class="campo-label">Discapacidad</span><span class="campo-value" id="dc-discapacidad">—</span></div>
+          </div>
+        </div>
+
+        <!-- CAJITA 4: HISTORIAL DE CITAS - ancho completo -->
+        <div class="seccion-card" style="margin-top:8px;" id="historialPanel">
+          <div class="seccion-title">📅 Historial de citas</div>
+          <div id="historialCitas">
+            <!-- citas dinámicas -->
+          </div>
+        </div>
 
         <!-- Summary Panel - Final Summary -->
         <section class="panel" id="summaryPanel" style="display:none;">
@@ -470,6 +626,8 @@
         </svg>
         <span id="syncStatus">Sincronización IA — Esperando audio</span>
       </div>
+      <span class="sep"></span>
+      <div class="seg" id="bdIndicator">BD: Cargando...</div>
       <span class="sep"></span>
       <div class="seg"><span>Registro CCO activo</span></div>
       <span class="sep"></span>
@@ -535,6 +693,191 @@
       return `${m}:${s}`;
     }
 
+    /* ========== PATIENT DATABASE SEARCH ========== */
+    let cedulaBuscada = null;
+    let nombreBuscado = null;
+
+    const NUMEROS = {
+      'cero':0, 'uno':1, 'dos':2, 'tres':3, 'cuatro':4,
+      'cinco':5, 'seis':6, 'siete':7, 'ocho':8, 'nueve':9,
+      'diez':10, 'once':11, 'doce':12, 'trece':13,
+      'catorce':14, 'quince':15, 'dieciséis':16,
+      'diecisiete':17, 'dieciocho':18, 'diecinueve':19,
+      'veinte':20, 'treinta':30, 'cuarenta':40,
+      'cincuenta':50, 'sesenta':60, 'setenta':70,
+      'ochenta':80, 'noventa':90, 'cien':100,
+      'ciento':1
+    };
+
+    function extraerCedulaDeTexto(texto) {
+      // Primero buscar dígitos directamente (ej: "1130589865")
+      const matchDigitos = texto.match(/\b\d{7,10}\b/);
+      if (matchDigitos) {
+        return matchDigitos[0];
+      }
+
+      // Convertir palabras numéricas a dígitos concatenados
+      // Ej: "uno uno tres cero cinco..." → "1130589865"
+      const palabras = texto.toLowerCase().split(/\s+/);
+      let digitos = '';
+
+      for (const palabra of palabras) {
+        const limpia = palabra.replace(/[^a-záéíóúñ]/g, '');
+
+        if (NUMEROS.hasOwnProperty(limpia)) {
+          const num = NUMEROS[limpia];
+          if (num < 10) {
+            digitos += num.toString();
+          } else {
+            // Para "once"=11, "doce"=12, etc.
+            digitos += num.toString();
+          }
+        } else if (digitos.length > 0) {
+          // Palabra no numérica interrumpe la secuencia
+          if (digitos.length >= 7) break;
+          digitos = '';
+        }
+      }
+
+      if (digitos.length >= 7 && digitos.length <= 10) {
+        return digitos;
+      }
+      return null;
+    }
+
+    async function buscarPaciente(cedula) {
+      try {
+        // Validar que la cédula tenga formato correcto
+        const cedulaLimpia = cedula.toString().trim();
+        if (!/^\d+$/.test(cedulaLimpia)) {
+          console.warn(`⚠️ Cédula inválida (contiene caracteres no numéricos): ${cedula}`);
+          return;
+        }
+
+        // Advertencia si tiene más de 10 dígitos (posible error de detección)
+        if (cedulaLimpia.length > 10) {
+          console.warn(`⚠️ Cédula con ${cedulaLimpia.length} dígitos (esperado 6-10): ${cedulaLimpia}`);
+        }
+
+        const response = await fetch(`/paciente/${cedulaLimpia}`);
+        const data = await response.json();
+        if (data.found) {
+          console.log(`✅ Paciente encontrado: ${cedulaLimpia}`);
+          mostrarDatosPaciente(data.paciente);
+        } else {
+          console.log(`⚠️ Paciente no encontrado: ${cedulaLimpia}`);
+        }
+      } catch (e) {
+        console.error('❌ Error buscando paciente:', e);
+      }
+    }
+
+    async function buscarPorNombre(nombre) {
+      try {
+        const response = await fetch(`/paciente/nombre/${encodeURIComponent(nombre)}`);
+        const data = await response.json();
+        if (data.found) {
+          console.log(`✅ Paciente encontrado por nombre: ${nombre}`);
+          mostrarDatosPaciente(data.paciente);
+        } else {
+          console.log(`⚠️ Paciente no encontrado por nombre: ${nombre}`);
+        }
+      } catch (e) {
+        console.error('❌ Error buscando por nombre:', e);
+      }
+    }
+
+    function mostrarDatosPaciente(p) {
+      // Datos básicos
+      const nombre = p.nombre || "—";
+      const cedula = p.cedula || "—";
+      const sexo = p.sexo || "—";
+
+      // Actualizar nombre y ID de paciente
+      $("patientName").textContent = nombre.toUpperCase();
+      $("patientId").textContent = `C.C. ${cedula} · ${sexo}`;
+
+      // ===== LLENAR CAJITAS DE DATOS =====
+      document.getElementById('dc-sexo').textContent = p.sexo || '—';
+      document.getElementById('dc-tipo-id').textContent = p.tipo_identificacion || '—';
+      document.getElementById('dc-numero-id').textContent = p.cedula || '—';
+      document.getElementById('dc-nacionalidad').textContent = p.nacionalidad || 'Colombia';
+      document.getElementById('dc-telefono').textContent = p.telefono || '—';
+      document.getElementById('dc-email').textContent = p.email || '—';
+
+      document.getElementById('dc-pais').textContent = p.pais || 'Colombia';
+      document.getElementById('dc-depto').textContent = p.departamento || '—';
+      document.getElementById('dc-ciudad').textContent = p.ciudad || '—';
+      document.getElementById('dc-zona').textContent = p.zona_territorial || '—';
+      document.getElementById('dc-direccion').textContent = p.direccion || '—';
+
+      document.getElementById('dc-eps').textContent = p.eps || '—';
+      document.getElementById('dc-plan').textContent = p.plan || (p.planes && p.planes.length > 0 ? p.planes.join(', ') : '—');
+      document.getElementById('dc-vinculacion').textContent = p.tipo_vinculacion || '—';
+      document.getElementById('dc-discapacidad').textContent = p.categoria_discapacidad || '—';
+
+      // Última cita
+      const ultimaCita = p.historial_citas && p.historial_citas.length > 0 ? p.historial_citas[0] : null;
+      document.getElementById('dc-ultima-cita').textContent =
+        ultimaCita ? ultimaCita.estado + ' · ' + (ultimaCita.fecha ? ultimaCita.fecha.split(' ')[0] : '—') : 'Sin citas';
+
+      // ===== HISTORIAL DE CITAS =====
+      const citasEl = $("historialCitas");
+      console.log(`🔍 Elemento historialCitas:`, citasEl);
+
+      const citas = p.historial_citas || [];
+      console.log(`📅 Citas del paciente:`, citas);
+      console.log(`📅 Longitud de citas:`, citas.length);
+
+      if (citas && citas.length > 0) {
+        const citasHTML = citas.map(c => {
+          console.log(`📅 Procesando cita:`, c);
+          const html = `
+            <div class="cita-row">
+              <span class="cita-badge ${c.estado?.toLowerCase() || ''}">${c.estado || "—"}</span>
+              <span class="cita-tipo">${c.tipo || "—"}</span>
+              <span class="cita-fecha">${c.fecha ? c.fecha.split(' ')[0] : ""}</span>
+            </div>
+          `;
+          console.log(`📝 HTML generado:`, html);
+          return html;
+        }).join('');
+        console.log(`📄 HTML total a insertar:`, citasHTML);
+        citasEl.innerHTML = citasHTML;
+        console.log(`✅ ${citas.length} citas renderizadas en el DOM`);
+      } else {
+        citasEl.innerHTML = '<div style="color:#7c8a82;font-size:12px;padding:4px 0">Sin citas registradas</div>';
+        console.log(`⚠️ No hay citas para mostrar`);
+      }
+
+      console.log(`✅ Datos completos del paciente mostrados: ${nombre}`);
+    }
+
+    function detectarCedula(texto) {
+      // Buscar cédula (números directos o palabras numéricas)
+      const cedula = extraerCedulaDeTexto(texto);
+      if (cedula) {
+        if (!cedulaBuscada || cedulaBuscada !== cedula) {
+          cedulaBuscada = cedula;
+          console.log(`🔍 Cédula detectada en transcripción: ${cedula}`);
+          // Ejecutar búsqueda INMEDIATAMENTE sin esperar
+          buscarPaciente(cedula);
+        }
+      }
+
+      // También buscar patrones simples de cédula: "cédula XXXX" o "C.C. XXXX"
+      const patronCedula = /(?:c\.?c\.?|c[ée]dula|identificaci[ó o]n)\s*[:#]?\s*(\d{7,10})/gi;
+      let match;
+      while ((match = patronCedula.exec(texto)) !== null) {
+        const cedulaDelPatron = match[1];
+        if (!cedulaBuscada || cedulaBuscada !== cedulaDelPatron) {
+          cedulaBuscada = cedulaDelPatron;
+          console.log(`🔍 Cédula detectada por patrón: ${cedulaDelPatron}`);
+          buscarPaciente(cedulaDelPatron);
+        }
+      }
+    }
+
     /* ========== DOM HELPERS ========== */
     function $(id) { return document.getElementById(id); }
 
@@ -572,6 +915,8 @@
           <span class="who">${who}</span>
           <span class="txt">${text}</span>
         `;
+        // Detectar cédula en el texto mostrado
+        detectarCedula(text);
       }
 
       scroll.appendChild(bubble);
@@ -596,6 +941,9 @@
         } else if (data.type === "transcription") {
           console.log("📨 Transcription data completa:", { text: data.text, speaker: data.speaker, start: data.start, end: data.end });
           handleTranscription(data);
+        } else if (data.type === "cedula_detectada") {
+          console.log(`🔍 Cédula detectada por IA: ${data.cedula}`);
+          buscarPaciente(data.cedula);
         } else if (data.type === "analysis") {
           handleAnalysis(data.data);
         } else if (data.type === "status") {
@@ -633,6 +981,11 @@
       clearTimeout(currentAnalysisTimeoutId);
       analysisInProgress = false;
 
+      // Buscar cédula en el texto acumulado también
+      if (accumulatedText && (!cedulaBuscada || cedulaBuscada === "")) {
+        detectarCedula(accumulatedText);
+      }
+
       // Update questions
       if (analysis.preguntas_sugeridas && analysis.preguntas_sugeridas.length > 0) {
         console.log(`❓ Actualizando preguntas: ${analysis.preguntas_sugeridas.length} nuevas`);
@@ -648,17 +1001,26 @@
         console.log(`✅ Panel de preguntas actualizado - Total: ${allQuestions.length}`);
       }
 
-      // Update patient data
+      // Update patient data (SOLO si no hay datos de BD)
       const paciente = analysis.datos_paciente || {};
-      if (paciente.nombre) {
-        $("patientCard").style.display = "flex";
-        $("patientName").textContent = paciente.nombre.toUpperCase();
-        $("patientId").textContent = `C.C. - · ${paciente.edad || "-"} años`;
+      const nombreDetectado = paciente.nombre;
+
+      // Solo actualizar si NO tenemos paciente en BD
+      if (!cedulaBuscada || cedulaBuscada === "") {
+        $("patientName").textContent = nombreDetectado ? nombreDetectado.toUpperCase() : "Esperando datos del paciente...";
+        $("patientId").textContent = paciente.edad ? `C.C. — · ${paciente.edad} años` : "C.C. — · — años";
+
+        // Si la IA detectó nombre, buscar en la BD
+        if (nombreDetectado && !nombreBuscado) {
+          nombreBuscado = nombreDetectado;
+          console.log(`🔍 Nombre detectado por IA: ${nombreDetectado}`);
+          buscarPorNombre(nombreDetectado);
+        }
       }
 
       // Update risk level
       const riesgo = (analysis.nivel_riesgo || "bajo").toLowerCase();
-      updateAlertPill(riesgo);
+      updateTriageBadges(riesgo);
 
       // Render alerts
       console.log(`🚨 Actualizando alertas: ${(analysis.alertas || []).length} alertas`);
@@ -671,37 +1033,41 @@
         console.log("📋 Resumen guardado:", lastSummary.substring(0, 100) + "...");
       }
 
-      // Render report
-      renderReport(paciente);
-
       // Update status
       $("syncStatus").textContent = "✅ Sincronización IA — OK";
       updateCheckpoints(paciente);
     }
 
-    function updateAlertPill(nivel) {
-      const pill = $("alertPill");
-      const levelSpan = $("alertLevel");
+    function updateTriageBadges(nivel) {
+      // Remover clase "active" de todos los badges
+      document.querySelectorAll(".tbadge").forEach(badge => {
+        badge.classList.remove("active");
+      });
 
-      let level = "-";
+      // Agregar "active" según el nivel de riesgo
+      let targetId = "";
       if (nivel === "crítico" || nivel === "alto") {
-        level = "CRÍTICO";
-        pill.style.animation = "critBlink 1.25s ease-in-out infinite";
+        targetId = "triage-emergencia";
       } else if (nivel === "medio") {
-        level = "ADVERTENCIA";
-      } else {
-        level = "BAJO RIESGO";
+        targetId = "triage-urgencia";
+      } else if (nivel === "bajo") {
+        targetId = "triage-consulta";
       }
 
-      levelSpan.textContent = level;
-      pill.style.display = "flex";
+      if (targetId) {
+        $(targetId).classList.add("active");
+        console.log(`✅ Badge activado: ${targetId}`);
+      }
     }
 
     function renderTriage(newCount) {
       console.log(`📋 renderTriage() - Renderizando ${allQuestions.length} preguntas`);
       const panel = $("triagePanel");
       panel.style.display = "flex";
-      $("triageCount").textContent = allQuestions.filter(q => q.checked).length;
+
+      const checked = allQuestions.filter(q => q.checked).length;
+      const total = allQuestions.length;
+      $("triageCount").textContent = `${checked}/${total}`;
 
       const list = $("triageList");
       list.innerHTML = allQuestions.map((q, i) => `
@@ -726,56 +1092,43 @@
     function renderAlerts(alertas) {
       console.log("🚨 renderAlerts llamada con:", alertas);
       const container = $("alertsContainer");
-      container.innerHTML = "";
+
+      // Limpiar alertas anteriores pero mantener placeholder si es necesario
+      const existingAlerts = container.querySelectorAll(".alert-side-item");
+      existingAlerts.forEach(el => el.remove());
 
       if (!alertas || alertas.length === 0) {
         console.log("⚠️ No hay alertas para mostrar");
+        // Mostrar placeholder si el container está vacío
+        if (container.children.length === 0) {
+          const placeholder = document.createElement("div");
+          placeholder.style.cssText = "font-size:11px;color:var(--ink-faint);text-align:center;padding:8px 4px;font-style:italic;";
+          placeholder.textContent = "Sin alertas por ahora";
+          container.appendChild(placeholder);
+        }
         return;
       }
 
-      console.log(`📢 Mostrando ${alertas.length} alertas`);
+      console.log(`📢 Procesando ${alertas.length} alertas`);
       alertas.forEach((alert, idx) => {
         console.log(`  Alert ${idx + 1}:`, alert);
         const div = document.createElement("div");
         const type = alert.toLowerCase().includes("crítico") || alert.toLowerCase().includes("urgente") ? "critical" : "warning";
-        div.className = `alert ${type}`;
-        div.innerHTML = `
-          <span class="ic-wrap">${Icon.triangle(21)}</span>
-          <div class="body">
-            <span class="tag">${type === "critical" ? "CRÍTICA · " : "ADVERTENCIA · "}</span>
-            ${alert}
-          </div>
-        `;
-        container.appendChild(div);
-        console.log(`  ✅ Alert renderizada como ${type}`);
+        div.className = `alert-side-item ${type}`;
+        div.textContent = alert;
+
+        // Insertar al principio (nuevas alertas arriba)
+        container.insertBefore(div, container.firstChild);
+        console.log(`  ✅ Alert-side renderizada como ${type}`);
       });
+
+      // Máximo 5 alertas, eliminar las más viejas
+      while (container.children.length > 5) {
+        container.removeChild(container.lastChild);
+        console.log(`  🗑️ Alerta antigua eliminada (límite: 5)`);
+      }
     }
 
-    function renderReport(paciente) {
-      $("reportPanel").style.display = "flex";
-      const grid = $("reportGrid");
-      grid.innerHTML = "";
-
-      const items = [];
-      if (paciente.nombre) items.push({ tone: "blue", ic: "heart", lab: "Paciente", val: paciente.nombre });
-      if (paciente.sintomas && paciente.sintomas.length > 0) items.push({ tone: "teal", ic: "pill", lab: "Síntomas", val: paciente.sintomas.join(", ") });
-      if (paciente.medicamentos && paciente.medicamentos.length > 0) items.push({ tone: "red", ic: "pill", lab: "Medicamentos", val: paciente.medicamentos.join(", ") });
-      if (paciente.alergias && paciente.alergias.length > 0) items.push({ tone: "red", ic: "allergy", lab: "Alergias", val: paciente.alergias.join(", ") });
-      if (!items.length) items.push({ tone: "green", ic: "home", lab: "Estado", val: "Esperando datos..." });
-
-      items.forEach(item => {
-        const cell = document.createElement("div");
-        cell.className = "report-cell";
-        cell.innerHTML = `
-          <div class="report-ic ${item.tone}">${Icon[item.ic](18)}</div>
-          <div>
-            <div class="rlab">${item.lab}</div>
-            <div class="rval">${item.val}</div>
-          </div>
-        `;
-        grid.appendChild(cell);
-      });
-    }
 
     function updateCheckpoints(paciente) {
       if (paciente.nombre) CHECKPOINTS[0].state = "done";
@@ -927,12 +1280,28 @@
       analysisInProgress = false;
       elapsedSeconds = 0;
       displayedUtteranceIds.clear();  // Limpiar el Set de utterances mostrados
+      cedulaBuscada = null;
+      nombreBuscado = null;
 
       $("transcriptScroll").innerHTML = "";
       $("triagePanel").style.display = "none";
-      $("reportPanel").style.display = "none";
-      $("alertPill").style.display = "none";
+
+      // Reset patient data a placeholders
+      $("patientName").textContent = "Esperando datos del paciente...";
+      $("patientId").textContent = "C.C. —";
+
+      // Reset alertas a placeholder
       $("alertsContainer").innerHTML = "";
+      const alertPlaceholder = document.createElement("div");
+      alertPlaceholder.style.cssText = "font-size:11px;color:var(--ink-faint);text-align:center;padding:8px 4px;font-style:italic;";
+      alertPlaceholder.textContent = "Sin alertas por ahora";
+      $("alertsContainer").appendChild(alertPlaceholder);
+
+      // Remover clase active de todos los triage badges
+      document.querySelectorAll(".tbadge").forEach(badge => {
+        badge.classList.remove("active");
+      });
+
       renderProgressBar();
 
       // Set up audio player with the selected file
@@ -972,8 +1341,46 @@
     });
 
     /* ========== INIT ========== */
+    function cargarEstadoBD() {
+      fetch('/bd-status')
+        .then(r => r.json())
+        .then(data => {
+          const bdIndicator = $("bdIndicator");
+          if (data.cargada) {
+            bdIndicator.innerHTML = `
+              <span style="color:#7fe39a">✓</span>
+              BD: ${data.total_pacientes} pacientes`;
+            bdIndicator.title = data.pacientes
+              .map(p => p.cedula + ': ' + p.nombre)
+              .join('\n');
+            console.log(`✅ Base de datos cargada: ${data.total_pacientes} pacientes`);
+          } else {
+            bdIndicator.innerHTML = '<span style="color:#ff6b6b">✗</span> BD: No cargada';
+            console.error('❌ Base de datos NO cargada');
+          }
+        })
+        .catch(e => {
+          console.error('Error cargando estado BD:', e);
+          $("bdIndicator").innerHTML = '<span style="color:#ff6b6b">✗</span> BD: Error';
+        });
+    }
+
     function init() {
       renderCheckpoints();
+
+      // Mostrar placeholders iniciales
+      $("patientName").textContent = "Esperando datos del paciente...";
+      $("patientId").textContent = "C.C. —";
+
+      // Mostrar placeholder en alertsContainer
+      const alertPlaceholder = document.createElement("div");
+      alertPlaceholder.style.cssText = "font-size:11px;color:var(--ink-faint);text-align:center;padding:8px 4px;font-style:italic;";
+      alertPlaceholder.textContent = "Sin alertas por ahora";
+      $("alertsContainer").appendChild(alertPlaceholder);
+
+      // Cargar estado de BD
+      cargarEstadoBD();
+
       connectWebSocket();
     }
 

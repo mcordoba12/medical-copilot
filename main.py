@@ -29,6 +29,9 @@ from config import (
     # GEMINI_API_KEY,  # Descomenta para usar Google Gemini
 )
 
+# ========== IMPORTAR BASE DE DATOS ==========
+from pacientes_db import cargar_base_datos, buscar_cedula_flexible
+
 logging.basicConfig(
     level=LOG_LEVEL,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -36,6 +39,38 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Copiloto Médico", version="6.4.0")
+
+# ========== CARGAR BASE DE DATOS DE PACIENTES ==========
+# Intentar múltiples rutas para mayor robustez
+POSSIBLE_PATHS = [
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "Bases de datos Prototipo Copiloto admisión.xlsx"),
+    os.path.join(os.getcwd(), "data", "Bases de datos Prototipo Copiloto admisión.xlsx"),
+    r"C:\Users\Angela\Documents\8 Octavo Semestre\IA 2\Proyecto coomeva\medical-copilot\data\Bases de datos Prototipo Copiloto admisión.xlsx"
+]
+
+EXCEL_PATH = None
+for path in POSSIBLE_PATHS:
+    if os.path.exists(path):
+        EXCEL_PATH = path
+        break
+
+if not EXCEL_PATH:
+    EXCEL_PATH = POSSIBLE_PATHS[0]  # Use first path as default
+
+logger.info(f"[INFO] Rutas probadas:")
+for path in POSSIBLE_PATHS:
+    logger.info(f"  - {path} (existe: {os.path.exists(path)})")
+logger.info(f"[INFO] Ruta seleccionada: {EXCEL_PATH}")
+
+PACIENTES_DB = cargar_base_datos(EXCEL_PATH)
+
+if PACIENTES_DB:
+    logger.info(f"[SUCCESS] Base de datos cargada: {len(PACIENTES_DB)} pacientes")
+    for cedula, p in PACIENTES_DB.items():
+        logger.info(f"   - {cedula}: {p['nombre']}")
+else:
+    logger.error("[ERROR] Base de datos NO cargada - verificar ruta del Excel")
+    logger.error(f"[ERROR] Ruta intentada: {EXCEL_PATH}")
 
 # Conexiones WebSocket activas: { websocket_id: WebSocket }
 active_connections = {}
@@ -77,8 +112,9 @@ def extract_json(text: str) -> dict:
         logger.debug(f"Limpieza y parse falló: {e}")
 
     # Retornar estructura por defecto si todo falla
-    logger.warning(f"⚠️ No se pudo extraer JSON de: {text[:100]}...")
+    logger.warning(f"[WARNING] No se pudo extraer JSON de: {text[:100]}...")
     return {
+        "cedula_detectada": None,
         "preguntas_sugeridas": ["¿Cuál es el motivo de su llamada?"],
         "datos_paciente": {"nombre": None, "sintomas": [], "medicamentos": [], "alergias": []},
         "nivel_riesgo": "bajo",
@@ -118,8 +154,19 @@ async def analyze_with_openai(transcript_text: str) -> dict:
 TRANSCRIPCIÓN:
 {transcript_text}
 
+IMPORTANTE para cedula_detectada:
+- IGNORA COMPLETAMENTE: 'sí', 'si', 'no', 'eh', 'este', 'pues', 'o sea', 'bueno', 'mira', 'buenas' (muletillas/confirmaciones)
+- El paciente dicta su cédula: solo palabras numéricas
+- 'once' = dos dígitos: 1,1 (NO el número 11)
+- 'treinta' = dos dígitos: 3,0 (NO el número 30)
+- 'veinte' = dos dígitos: 2,0 (NO el número 20)
+- Cada palabra numérica se convierte a sus dígitos individuales
+- Cédulas colombianas: máximo 10 dígitos
+- Si obtienes >10 dígitos después de filtrar, revisaste mal
+
 JSON requerido:
 {{
+  "cedula_detectada": "solo números si detectada (máx 10 dígitos), null si no",
   "preguntas_sugeridas": ["pregunta1", "pregunta2", "pregunta3"],
   "datos_paciente": {{
     "nombre": null,
@@ -182,8 +229,19 @@ async def analyze_with_claude(transcript_text: str) -> dict:
 TRANSCRIPCIÓN:
 {transcript_text}
 
+IMPORTANTE para cedula_detectada:
+- IGNORA COMPLETAMENTE: 'sí', 'si', 'no', 'eh', 'este', 'pues', 'o sea', 'bueno', 'mira', 'buenas' (muletillas/confirmaciones)
+- El paciente dicta su cédula: solo palabras numéricas
+- 'once' = dos dígitos: 1,1 (NO el número 11)
+- 'treinta' = dos dígitos: 3,0 (NO el número 30)
+- 'veinte' = dos dígitos: 2,0 (NO el número 20)
+- Cada palabra numérica se convierte a sus dígitos individuales
+- Cédulas colombianas: máximo 10 dígitos
+- Si obtienes >10 dígitos después de filtrar, revisaste mal
+
 Responde SOLO con este JSON:
 {{
+  "cedula_detectada": "solo números si detectada (máx 10 dígitos), null si no",
   "preguntas_sugeridas": ["pregunta1", "pregunta2", "pregunta3"],
   "datos_paciente": {{
     "nombre": null,
@@ -406,6 +464,80 @@ async def health_check():
             "method": "assemblyai_speaker_labels"
         },
         "timestamp": datetime.now().isoformat()
+    })
+
+
+@app.get("/bd-status")
+async def bd_status():
+    """Estado de la base de datos de pacientes"""
+    logger.debug(f"[DEBUG] /bd-status llamado - PACIENTES_DB len: {len(PACIENTES_DB)}")
+    return JSONResponse({
+        "cargada": len(PACIENTES_DB) > 0,
+        "total_pacientes": len(PACIENTES_DB),
+        "pacientes": [
+            {"cedula": k, "nombre": v["nombre"]}
+            for k, v in PACIENTES_DB.items()
+        ]
+    })
+
+
+@app.get("/debug-db")
+async def debug_db():
+    """Endpoint de debug - Info sobre BD"""
+    return JSONResponse({
+        "PACIENTES_DB_len": len(PACIENTES_DB),
+        "PACIENTES_DB_type": str(type(PACIENTES_DB)),
+        "EXCEL_PATH": EXCEL_PATH,
+        "EXCEL_EXISTS": os.path.exists(EXCEL_PATH),
+        "PACIENTES_DB_keys": list(PACIENTES_DB.keys())
+    })
+
+
+@app.get("/paciente/{cedula}")
+async def buscar_paciente(cedula: str):
+    """Buscar paciente por cédula en la base de datos (RÁPIDO - sin logs innecesarios)"""
+    cedula_limpia = cedula.strip()
+
+    # Búsqueda exacta primero (O(1))
+    paciente = PACIENTES_DB.get(cedula_limpia)
+    if paciente:
+        return JSONResponse({
+            "found": True,
+            "paciente": paciente
+        })
+
+    # Si no encuentra exacta, probar búsqueda flexible
+    paciente = buscar_cedula_flexible(cedula_limpia, PACIENTES_DB)
+    if paciente:
+        return JSONResponse({
+            "found": True,
+            "paciente": paciente
+        })
+
+    # No encontrado - respuesta silenciosa
+    return JSONResponse({
+        "found": False,
+        "message": f"No se encontró paciente con cédula: {cedula_limpia}"
+    })
+
+
+@app.get("/paciente/nombre/{nombre}")
+async def buscar_paciente_por_nombre(nombre: str):
+    """Buscar paciente por nombre en la base de datos"""
+    nombre_lower = nombre.lower().strip()
+
+    for cedula, paciente in PACIENTES_DB.items():
+        if nombre_lower in paciente["nombre"].lower():
+            logger.info(f"[SUCCESS] Paciente encontrado por nombre: {nombre}")
+            return JSONResponse({
+                "found": True,
+                "paciente": paciente
+            })
+
+    logger.warning(f"[WARNING] Paciente no encontrado por nombre: {nombre}")
+    return JSONResponse({
+        "found": False,
+        "message": f"No se encontró paciente con nombre: {nombre}"
     })
 
 
@@ -922,22 +1054,33 @@ async def websocket_audio_stream(websocket: WebSocket):
                         # Análisis BAJO DEMANDA desde el frontend
                         if data.get("type") == "analyze":
                             transcript_text = data.get("text", "")
-                            logger.info(f"📊 Análisis bajo demanda: {len(transcript_text)} caracteres")
+                            logger.info(f"[INFO] Análisis bajo demanda: {len(transcript_text)} caracteres")
 
                             try:
                                 analysis = await analyze(transcript_text)
+
+                                # Enviar cédula detectada si existe
+                                cedula_detectada = analysis.get("cedula_detectada")
+                                if cedula_detectada:
+                                    logger.info(f"[SUCCESS] Cédula detectada por IA: {cedula_detectada}")
+                                    await websocket.send_json({
+                                        "type": "cedula_detectada",
+                                        "cedula": cedula_detectada
+                                    })
+
                                 await websocket.send_json({
                                     "type": "analysis",
                                     "data": analysis,
                                     "progressive": True
                                 })
-                                logger.info(f"✅ Análisis enviado al frontend")
+                                logger.info(f"[SUCCESS] Análisis enviado al frontend")
                             except Exception as e:
-                                logger.error(f"❌ Error en análisis: {e}")
+                                logger.error(f"[ERROR] Error en análisis: {e}")
                                 # Enviar análisis por defecto con al menos una pregunta
                                 await websocket.send_json({
                                     "type": "analysis",
                                     "data": {
+                                        "cedula_detectada": None,
                                         "preguntas_sugeridas": ["¿Cuál es el motivo de su llamada?"],
                                         "datos_paciente": {"nombre": None, "sintomas": [], "medicamentos": [], "alergias": []},
                                         "nivel_riesgo": "bajo",
