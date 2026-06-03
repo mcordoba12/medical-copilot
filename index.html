@@ -331,11 +331,11 @@
       display:flex;align-items:center;gap:5px;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #eef2ef;
     }
     .campo{
-      display:flex;justify-content:space-between;font-size:11.5px;padding:3px 0;border-bottom:1px solid #f4f7f5;
+      display:flex;justify-content:space-between;font-size:10px;padding:4px 0;border-bottom:1px solid #f4f7f5;
     }
     .campo:last-child{border-bottom:none;}
-    .campo-label{color:#7c8a82;font-weight:600;}
-    .campo-value{color:#1b2620;font-weight:700;text-align:right;max-width:50%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .campo-label{color:#7c8a82;font-weight:600;font-size:9.5px;}
+    .campo-value{color:#1b2620;font-weight:600;text-align:right;max-width:none;overflow:visible;font-size:8.5px;word-break:break-word;}
 
     .cita-row{
       display:flex;align-items:center;gap:8px;font-size:10px;padding:6px 0;border-bottom:1px solid #f4f7f5;min-height:24px;
@@ -811,9 +811,20 @@
       document.getElementById('dc-zona').textContent = p.zona_territorial || '—';
       document.getElementById('dc-direccion').textContent = p.direccion || '—';
 
-      document.getElementById('dc-eps').textContent = p.eps || '—';
-      document.getElementById('dc-plan').textContent = p.plan || (p.planes && p.planes.length > 0 ? p.planes.join(', ') : '—');
-      document.getElementById('dc-vinculacion').textContent = p.tipo_vinculacion || '—';
+      // Verificar si está afiliado
+      const tieneEPS = p.eps && p.eps.trim() && p.eps !== '—';
+      const tienePlan = (p.plan && p.plan.trim() && p.plan !== '—') || (p.planes && p.planes.length > 0);
+      const esAfiliado = tieneEPS || tienePlan;
+
+      if (esAfiliado) {
+        document.getElementById('dc-eps').textContent = p.eps || '—';
+        document.getElementById('dc-plan').textContent = p.plan || (p.planes && p.planes.length > 0 ? p.planes.join(', ') : '—');
+        document.getElementById('dc-vinculacion').textContent = p.tipo_vinculacion || '—';
+      } else {
+        document.getElementById('dc-eps').textContent = 'No afiliado';
+        document.getElementById('dc-plan').textContent = 'No afiliado';
+        document.getElementById('dc-vinculacion').textContent = 'No afiliado';
+      }
       document.getElementById('dc-discapacidad').textContent = p.categoria_discapacidad || '—';
 
       // Última cita
