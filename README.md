@@ -69,7 +69,7 @@ Ahora el prompt debería mostrar `(medical-copilot)` en lugar de `(base)`.
 ### Paso 5: Instalar dependencias
 
 ```bash
-pip install fastapi uvicorn websockets httpx python-dotenv pydub openai ollama
+pip install fastapi uvicorn websockets httpx python-dotenv pydub openai ollama anthropic
 ```
 
 *(Toma ~2-3 minutos)*

@@ -529,6 +529,11 @@
           <div class="patient-main">
             <div class="patient-name" id="patientName">-</div>
             <div class="patient-id" id="patientId">-</div>
+            <div id="manualCedulaContainer" style="display:none; margin-top:4px;">
+              <input type="text" id="manualCedulaInput" placeholder="Cédula manual..."
+                     style="width:100%; padding:4px 6px; font-size:11px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink);">
+              <button id="manualCedulaBtn" style="margin-top:4px; padding:4px 8px; font-size:11px; background:var(--green-600); color:white; border:none; border-radius:6px; cursor:pointer;">Buscar por cédula</button>
+            </div>
             <div class="patient-loc" id="patientLoc" style="display:none;">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>
@@ -766,6 +771,9 @@
           mostrarDatosPaciente(data.paciente);
         } else {
           console.log(`⚠️ Paciente no encontrado: ${cedulaLimpia}`);
+          $("patientName").textContent = "⚠️ Paciente no encontrado";
+          $("patientId").textContent = `C.C. ${cedulaLimpia} · Sin datos`;
+          mostrarAlerta(`⚠️ Paciente con cédula ${cedulaLimpia} no encontrado en la BD`);
         }
       } catch (e) {
         console.error('❌ Error buscando paciente:', e);
@@ -781,10 +789,22 @@
           mostrarDatosPaciente(data.paciente);
         } else {
           console.log(`⚠️ Paciente no encontrado por nombre: ${nombre}`);
+          $("patientName").textContent = "⚠️ Paciente no encontrado por nombre";
+          $("patientId").textContent = "C.C. — · Sin datos";
+          mostrarAlerta(`⚠️ Paciente "${nombre}" no encontrado en la BD`);
         }
       } catch (e) {
         console.error('❌ Error buscando por nombre:', e);
       }
+    }
+
+    function mostrarAlerta(mensaje) {
+      const container = $("alertsContainer");
+      container.innerHTML = "";
+      const alerta = document.createElement("div");
+      alerta.textContent = mensaje;
+      alerta.style.cssText = "font-size:12px;color:var(--red);padding:8px 4px;";
+      container.appendChild(alerta);
     }
 
     function mostrarDatosPaciente(p) {
@@ -936,35 +956,49 @@
 
     /* ========== WEBSOCKET SETUP ========== */
     function connectWebSocket() {
+      if (ws) {
+        ws.close();
+      }
       ws = new WebSocket("ws://127.0.0.1:8000/ws/audio-stream");
 
       ws.onopen = () => {
         console.log("✅ WebSocket conectado");
+        $("syncStatus").textContent = "Sincronización IA — Esperando audio";
       };
 
       ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        console.log("📨 Mensaje recibido:", data.type, data);
+        try {
+          const data = JSON.parse(event.data);
+          console.log("📨 Mensaje recibido:", data.type, data);
 
-        if (data.type === "session_id") {
-          sessionId = data.id;
-          $("sessionId").textContent = `Sesión #${sessionId.substring(0, 8)}`;
-        } else if (data.type === "transcription") {
-          console.log("📨 Transcription data completa:", { text: data.text, speaker: data.speaker, start: data.start, end: data.end });
-          handleTranscription(data);
-        } else if (data.type === "cedula_detectada") {
-          console.log(`🔍 Cédula detectada por IA: ${data.cedula}`);
-          buscarPaciente(data.cedula);
-        } else if (data.type === "analysis") {
-          handleAnalysis(data.data);
-        } else if (data.type === "status") {
-          $("syncStatus").textContent = data.message;
+          if (data.type === "session_id") {
+            sessionId = data.id;
+            $("sessionId").textContent = `Sesión #${sessionId.substring(0, 8)}`;
+          } else if (data.type === "transcription") {
+            console.log("📨 Transcription data completa:", { text: data.text, speaker: data.speaker, start: data.start, end: data.end });
+            handleTranscription(data);
+          } else if (data.type === "cedula_detectada") {
+            console.log(`🔍 Cédula detectada por IA: ${data.cedula}`);
+            buscarPaciente(data.cedula);
+          } else if (data.type === "analysis") {
+            handleAnalysis(data.data);
+          } else if (data.type === "status") {
+            $("syncStatus").textContent = data.message;
+          }
+        } catch (err) {
+          console.error("❌ Error parseando mensaje WebSocket:", err, event.data);
         }
       };
 
       ws.onerror = (error) => {
         console.error("❌ Error WebSocket:", error);
         $("syncStatus").textContent = "❌ Error de conexión";
+      };
+
+      ws.onclose = () => {
+        console.warn("🔌 WebSocket cerrado, reconectando en 3 segundos...");
+        $("syncStatus").textContent = "⚠️ Reconectando...";
+        setTimeout(connectWebSocket, 3000);
       };
     }
 
@@ -1210,6 +1244,19 @@
       } else {
         console.warn("⚠️ No hay resumen disponible");
       }
+
+      // Final attempt: solicitar análisis con el transcript completo
+      if (accumulatedText.length > 50 && !analysisInProgress) {
+        console.log("📤 Análisis final con transcript completo...");
+        requestAnalysis();
+      }
+
+      // Mostrar input manual si no se detectó cédula automáticamente
+      if (!cedulaBuscada) {
+        $("manualCedulaContainer").style.display = "block";
+        $("manualCedulaInput").focus();
+        console.log("📝 Mostrando input manual para cédula");
+      }
     }
 
     function updateTranscriptionDisplay() {
@@ -1274,6 +1321,19 @@
       }, ANALYSIS_TIMEOUT);
     }
 
+    /* ========== MANUAL CÉDULA INPUT ========== */
+    $("manualCedulaBtn").addEventListener("click", () => {
+      const cedula = $("manualCedulaInput").value.trim();
+      if (cedula && /^\d+$/.test(cedula)) {
+        buscarPaciente(cedula);
+      }
+    });
+    $("manualCedulaInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        $("manualCedulaBtn").click();
+      }
+    });
+
     /* ========== FILE UPLOAD ========== */
     $("uploadBtn").addEventListener("click", () => {
       $("audioFile").click();
@@ -1294,6 +1354,9 @@
       cedulaBuscada = null;
       nombreBuscado = null;
 
+      $("manualCedulaContainer").style.display = "none";
+      $("manualCedulaInput").value = "";
+
       $("transcriptScroll").innerHTML = "";
       $("triagePanel").style.display = "none";
 
@@ -1312,6 +1375,28 @@
       document.querySelectorAll(".tbadge").forEach(badge => {
         badge.classList.remove("active");
       });
+
+      // Reset all detail cards to placeholders
+      ["dc-sexo","dc-tipo-id","dc-numero-id","dc-nacionalidad",
+       "dc-telefono","dc-email","dc-pais","dc-depto","dc-ciudad",
+       "dc-zona","dc-direccion","dc-eps","dc-plan","dc-vinculacion",
+       "dc-ultima-cita","dc-discapacidad"].forEach(
+        id => document.getElementById(id).textContent = "—"
+      );
+
+      // Reset historial de citas
+      $("historialCitas").innerHTML = '<div style="color:#7c8a82;font-size:12px;padding:4px 0">Sin citas registradas</div>';
+
+      // Reset summary
+      $("summaryText").textContent = "";
+      $("summaryPanel").style.display = "none";
+
+      // Reset triage list and count
+      $("triageList").innerHTML = "";
+      $("triageCount").textContent = "0/0";
+
+      // Reset sync status
+      $("syncStatus").textContent = "Sincronización IA — Esperando audio";
 
       renderProgressBar();
 
@@ -1335,17 +1420,43 @@
       audioElement.addEventListener("pause", onAudioPause);
       audioElement.addEventListener("ended", onAudioEnded);
 
-      // Hide summary when loading new file
-      $("summaryPanel").style.display = "none";
-
       console.log("🎵 Listeners agregados correctamente");
 
       // Upload to WebSocket
       const reader = new FileReader();
+      reader.onerror = () => {
+        console.error("❌ FileReader error al leer el archivo");
+        $("syncStatus").textContent = "❌ Error al leer archivo de audio";
+      };
       reader.onload = (event) => {
+        const arrayBuffer = event.target.result;
         if (ws && ws.readyState === WebSocket.OPEN) {
-          ws.send(event.target.result);
+          ws.send(arrayBuffer);
           $("syncStatus").textContent = "⏳ Procesando audio...";
+          console.log("📤 Audio enviado por WebSocket, tamaño:", arrayBuffer.byteLength);
+        } else {
+          console.warn("⚠️ WebSocket no disponible, estado:", ws ? ws.readyState : "null");
+          $("syncStatus").textContent = "⚠️ WebSocket no disponible, subiendo por HTTP...";
+          // Fallback: enviar por HTTP POST a /transcribe
+          const blob = new Blob([arrayBuffer], { type: file.type || "audio/wav" });
+          const formData = new FormData();
+          formData.append("file", blob, file.name);
+          formData.append("websocket_id", sessionId || "");
+          fetch("/transcribe", {
+            method: "POST",
+            body: formData
+          })
+          .then(res => res.json())
+          .then(data => {
+            console.log("📤 Respuesta HTTP /transcribe:", data);
+            $("syncStatus").textContent = data.status === "success"
+              ? "✅ Audio enviado por HTTP"
+              : `❌ Error: ${data.message || "desconocido"}`;
+          })
+          .catch(err => {
+            console.error("❌ Error en fallback HTTP:", err);
+            $("syncStatus").textContent = "❌ Error al enviar audio";
+          });
         }
       };
       reader.readAsArrayBuffer(file);

@@ -3,6 +3,12 @@ import json
 import logging
 import io
 import os
+
+# httpx/ollama fallan si SSL_CERT_FILE apunta a un archivo inexistente
+ssl_cert = os.environ.get("SSL_CERT_FILE")
+if ssl_cert and not os.path.exists(ssl_cert):
+    del os.environ["SSL_CERT_FILE"]
+
 import uuid
 import tempfile
 import httpx
@@ -184,7 +190,8 @@ JSON requerido:
             response_format={"type": "json_object"}
         )
 
-        text = response.choices[0].message.content
+        content = response.choices[0].message.content
+        text = content if content is not None else ""
         logger.debug(f"Respuesta OpenAI: {text[:200]}...")
 
         # Extraer JSON con función robusta
@@ -257,7 +264,8 @@ Responde SOLO con este JSON:
             )
         )
 
-        text = response.content[0].text
+        first_block = response.content[0]
+        text = first_block.text if isinstance(first_block, anthropic.types.TextBlock) and first_block.text is not None else ""
         # Limpiar markdown si existe
         text = re.sub(r'```json\n?', '', text)
         text = re.sub(r'```\n?', '', text)
@@ -388,8 +396,19 @@ Analiza esta transcripción de llamada médica y extrae información relevante.
 TRANSCRIPCIÓN:
 {transcript_text}
 
+IMPORTANTE para cedula_detectada:
+- IGNORA COMPLETAMENTE: 'sí', 'si', 'no', 'eh', 'este', 'pues', 'o sea', 'bueno', 'mira', 'buenas' (muletillas/confirmaciones)
+- El paciente dicta su cédula: solo palabras numéricas
+- 'once' = dos dígitos: 1,1 (NO el número 11)
+- 'treinta' = dos dígitos: 3,0 (NO el número 30)
+- 'veinte' = dos dígitos: 2,0 (NO el número 20)
+- Cada palabra numérica se convierte a sus dígitos individuales
+- Cédulas colombianas: máximo 10 dígitos
+- Si obtienes >10 dígitos después de filtrar, revisaste mal
+
 Responde EXACTAMENTE con este JSON válido, sin texto adicional:
 {{
+  "cedula_detectada": "solo números si detectada (máx 10 dígitos), null si no",
   "preguntas_sugeridas": ["pregunta1", "pregunta2", "pregunta3"],
   "datos_paciente": {{
     "nombre": null,
@@ -488,7 +507,7 @@ async def debug_db():
         "PACIENTES_DB_len": len(PACIENTES_DB),
         "PACIENTES_DB_type": str(type(PACIENTES_DB)),
         "EXCEL_PATH": EXCEL_PATH,
-        "EXCEL_EXISTS": os.path.exists(EXCEL_PATH),
+        "EXCEL_EXISTS": os.path.exists(EXCEL_PATH) if EXCEL_PATH else False,
         "PACIENTES_DB_keys": list(PACIENTES_DB.keys())
     })
 
@@ -893,6 +912,7 @@ async def transcribe_audio(
     websocket_id: str = Form(...)
 ):
     """Transcribe un archivo usando AssemblyAI con diarización integrada"""
+    client_ws = None
     try:
         logger.info(f"📤 Archivo: {file.filename}, WebSocket ID: {websocket_id}")
 
@@ -964,13 +984,14 @@ async def transcribe_audio(
 
     except Exception as e:
         logger.error(f"❌ Error en transcribe: {e}")
-        try:
-            await client_ws.send_json({
-                "type": "error",
-                "message": f"Error: {str(e)}"
-            })
-        except:
-            pass
+        if client_ws:
+            try:
+                await client_ws.send_json({
+                    "type": "error",
+                    "message": f"Error: {str(e)}"
+                })
+            except:
+                pass
         return JSONResponse({
             "status": "error",
             "message": str(e)
