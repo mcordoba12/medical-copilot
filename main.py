@@ -18,6 +18,7 @@ from datetime import datetime
 from fastapi import FastAPI, WebSocket, UploadFile, File, Form
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 import websockets
 from pydub import AudioSegment
 from pydub.utils import mediainfo
@@ -49,12 +50,19 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Copiloto Médico", version="6.4.0")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # ========== CARGAR BASE DE DATOS DE PACIENTES ==========
 # Intentar múltiples rutas para mayor robustez
 POSSIBLE_PATHS = [
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "Bases de datos Prototipo Copiloto admisión.xlsx"),
     os.path.join(os.getcwd(), "data", "Bases de datos Prototipo Copiloto admisión.xlsx"),
-    r"C:\Users\Angela\Documents\8 Octavo Semestre\IA 2\Proyecto coomeva\medical-copilot\data\Bases de datos Prototipo Copiloto admisión.xlsx"
 ]
 
 EXCEL_PATH = None
