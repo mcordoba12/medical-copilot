@@ -551,24 +551,25 @@ async def buscar_paciente(cedula: str):
     })
 
 
-@app.get("/paciente/nombre/{nombre}")
-async def buscar_paciente_por_nombre(nombre: str):
-    """Buscar paciente por nombre en la base de datos"""
-    nombre_lower = nombre.lower().strip()
-
-    for cedula, paciente in PACIENTES_DB.items():
-        if nombre_lower in paciente["nombre"].lower():
-            logger.info(f"[SUCCESS] Paciente encontrado por nombre: {nombre}")
-            return JSONResponse({
-                "found": True,
-                "paciente": paciente
-            })
-
-    logger.warning(f"[WARNING] Paciente no encontrado por nombre: {nombre}")
-    return JSONResponse({
-        "found": False,
-        "message": f"No se encontró paciente con nombre: {nombre}"
-    })
+# BUSCAR POR NOMBRE - DESACTIVADO
+# @app.get("/paciente/nombre/{nombre}")
+# async def buscar_paciente_por_nombre(nombre: str):
+#     """Buscar paciente por nombre en la base de datos"""
+#     nombre_lower = nombre.lower().strip()
+#
+#     for cedula, paciente in PACIENTES_DB.items():
+#         if nombre_lower in paciente["nombre"].lower():
+#             logger.info(f"[SUCCESS] Paciente encontrado por nombre: {nombre}")
+#             return JSONResponse({
+#                 "found": True,
+#                 "paciente": paciente
+#             })
+#
+#     logger.warning(f"[WARNING] Paciente no encontrado por nombre: {nombre}")
+#     return JSONResponse({
+#         "found": False,
+#         "message": f"No se encontró paciente con nombre: {nombre}"
+#     })
 
 
 # DEEPGRAM - DESACTIVADO TEMPORALMENTE

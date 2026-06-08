@@ -780,23 +780,24 @@
       }
     }
 
-    async function buscarPorNombre(nombre) {
-      try {
-        const response = await fetch(`/paciente/nombre/${encodeURIComponent(nombre)}`);
-        const data = await response.json();
-        if (data.found) {
-          console.log(`✅ Paciente encontrado por nombre: ${nombre}`);
-          mostrarDatosPaciente(data.paciente);
-        } else {
-          console.log(`⚠️ Paciente no encontrado por nombre: ${nombre}`);
-          $("patientName").textContent = "⚠️ Paciente no encontrado por nombre";
-          $("patientId").textContent = "C.C. — · Sin datos";
-          mostrarAlerta(`⚠️ Paciente "${nombre}" no encontrado en la BD`);
-        }
-      } catch (e) {
-        console.error('❌ Error buscando por nombre:', e);
-      }
-    }
+    // BUSCAR POR NOMBRE - DESACTIVADO
+    // async function buscarPorNombre(nombre) {
+    //   try {
+    //     const response = await fetch(`/paciente/nombre/${encodeURIComponent(nombre)}`);
+    //     const data = await response.json();
+    //     if (data.found) {
+    //       console.log(`✅ Paciente encontrado por nombre: ${nombre}`);
+    //       mostrarDatosPaciente(data.paciente);
+    //     } else {
+    //       console.log(`⚠️ Paciente no encontrado por nombre: ${nombre}`);
+    //       $("patientName").textContent = "⚠️ Paciente no encontrado por nombre";
+    //       $("patientId").textContent = "C.C. — · Sin datos";
+    //       mostrarAlerta(`⚠️ Paciente "${nombre}" no encontrado en la BD`);
+    //     }
+    //   } catch (e) {
+    //     console.error('❌ Error buscando por nombre:', e);
+    //   }
+    // }
 
     function mostrarAlerta(mensaje) {
       const container = $("alertsContainer");
@@ -1060,7 +1061,7 @@ ws = new WebSocket(`${protocol}//${window.location.host}/ws/audio-stream`);
         if (nombreDetectado && !nombreBuscado) {
           nombreBuscado = nombreDetectado;
           console.log(`🔍 Nombre detectado por IA: ${nombreDetectado}`);
-          buscarPorNombre(nombreDetectado);
+          // buscarPorNombre(nombreDetectado);  // DESACTIVADO
         }
       }
 
