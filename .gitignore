@@ -51,3 +51,6 @@ models/
 
 
 .claude
+
+# Audio
+*.mp3

@@ -21,7 +21,10 @@ from fastapi.staticfiles import StaticFiles
 import websockets
 from pydub import AudioSegment
 from pydub.utils import mediainfo
-import ollama
+try:
+    import ollama
+except ImportError:
+    ollama = None
 from openai import AsyncOpenAI
 import anthropic
 # import google.generativeai as genai  # Descomenta para usar Google Gemini
