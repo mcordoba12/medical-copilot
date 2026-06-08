@@ -959,7 +959,8 @@
       if (ws) {
         ws.close();
       }
-      ws = new WebSocket("ws://127.0.0.1:8000/ws/audio-stream");
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+ws = new WebSocket(`${protocol}//${window.location.host}/ws/audio-stream`);
 
       ws.onopen = () => {
         console.log("✅ WebSocket conectado");
