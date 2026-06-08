@@ -69,15 +69,16 @@
       border-bottom:2px solid var(--green-900);
       position:relative;
     }
-    .brand{display:flex;align-items:center;gap:8px;width:auto;}
+    .brand{display:flex;align-items:center;gap:12px;width:auto;}
     .logo-slot{
-      width:32px;height:32px;border-radius:6px;
-      border:1px dashed rgba(255,255,255,.5);
+      width:48px;height:48px;border-radius:8px;
+      border:none;
       display:flex;align-items:center;justify-content:center;
       color:rgba(255,255,255,.7);
       font-size:6px;font-weight:700;letter-spacing:.3px;text-align:center;line-height:1;
-      background:rgba(255,255,255,.06);
+      background:rgba(255,255,255,.08);
       text-transform:uppercase;
+      overflow:hidden;
     }
     .brand-meta{display:flex;flex-direction:column;line-height:1.05;}
     .brand-meta .org{font-weight:700;font-size:10px;letter-spacing:.1px;}
@@ -458,7 +459,9 @@
     <!-- HEADER -->
     <header class="header">
       <div class="brand">
-        <div class="logo-slot">Logo<br/>aquí</div>
+        <div class="logo-slot">
+          <img src="assets/logo.png" alt="Logo Coomeva" style="width:100%;height:100%;object-fit:contain;border-radius:6px;">
+        </div>
         <div class="brand-meta">
           <span class="org">Centro de Admisiones</span>
           <span class="unit">Central de Regulación Médica</span>
@@ -1055,12 +1058,14 @@
         $("patientName").textContent = nombreDetectado ? nombreDetectado.toUpperCase() : "Esperando datos del paciente...";
         $("patientId").textContent = paciente.edad ? `C.C. — · ${paciente.edad} años` : "C.C. — · — años";
 
-        // Si la IA detectó nombre, buscar en la BD
-        if (nombreDetectado && !nombreBuscado) {
-          nombreBuscado = nombreDetectado;
-          console.log(`🔍 Nombre detectado por IA: ${nombreDetectado}`);
-          buscarPorNombre(nombreDetectado);
-        }
+        // DESHABILITADO: No buscar por nombre detectado en transcripción
+        // Razón: Los nombres detectados de la transcripción suelen tener errores y no coinciden exactamente con BD
+        // La búsqueda por cédula es suficiente y más confiable
+        // if (nombreDetectado && !nombreBuscado) {
+        //   nombreBuscado = nombreDetectado;
+        //   console.log(`🔍 Nombre detectado por IA: ${nombreDetectado}`);
+        //   buscarPorNombre(nombreDetectado);
+        // }
       }
 
       // Update risk level

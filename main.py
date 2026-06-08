@@ -49,6 +49,15 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Copiloto Médico", version="6.4.0")
 
+# ========== SERVIR ARCHIVOS ESTÁTICOS ==========
+# Montar carpeta assets para servir imágenes, CSS, etc.
+assets_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
+if os.path.exists(assets_path):
+    app.mount("/assets", StaticFiles(directory=assets_path), name="assets")
+    logger.info(f"✅ Carpeta assets montada: {assets_path}")
+else:
+    logger.warning(f"⚠️ Carpeta assets no encontrada: {assets_path}")
+
 # ========== CARGAR BASE DE DATOS DE PACIENTES ==========
 # Intentar múltiples rutas para mayor robustez
 POSSIBLE_PATHS = [
